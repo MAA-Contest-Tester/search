@@ -22,3 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# no pull requests with npm plz
+package-lock.json

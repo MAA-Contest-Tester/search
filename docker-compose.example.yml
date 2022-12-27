@@ -1,0 +1,15 @@
+version: '2'
+services:
+  web:
+    image: junikimm717/psearch:latest
+    ports:
+      - "7827:7827"
+    environment:
+      - REDIS=redis:6379
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli", "-u", "redis://redis:6379","ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis/redis-stack:latest

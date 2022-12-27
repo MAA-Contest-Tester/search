@@ -25,3 +25,4 @@ go.work
 /out
 /search
 *.log
+package-lock.json
