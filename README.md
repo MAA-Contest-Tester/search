@@ -31,7 +31,3 @@ scraped from AoPS.
 Use the included `./docker-compose.example.yml` as an example for how to set up
 the containers. There needs to be an environment variable connecting the app to
 the redis server.
-
-On startup, the app will scrape the AoPS wiki and insert all problems into the
-redis database, so make sure you've made all your changes before you deploy; you
-could use up a lot of bandwidth.
