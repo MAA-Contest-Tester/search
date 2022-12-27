@@ -28,7 +28,11 @@ const delimiters = [
 const macros = {
   "\\emph": "\\textit",
   "\\textsc": "",
+  "\\textdollar": "\\$",
   "\\overarc": "\\overgroup",
+  "\\dfrac": "\\frac",
+  "\\ ": " ",
+  "\\O": "\\empty",
 };
 
 export default function Result(props: {

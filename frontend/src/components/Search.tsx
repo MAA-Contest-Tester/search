@@ -3,6 +3,8 @@ import Result from "./Result";
 import { debounce } from "debounce";
 
 export default function Search() {
+  const [statement, setStatement] = useState<string>();
+  const [source, setSource] = useState<string>();
   const [query, setQuery] = useState("");
   const [error, setError] = useState<any | null>(null);
   const [results, setResults] = useState<any[]>([]);
@@ -24,6 +26,20 @@ export default function Search() {
   useEffect(() => {
     debounced_api();
   }, [query]);
+
+  useEffect(() => {
+    let q = "";
+    const whitespace = new RegExp("^s*$");
+    if (!whitespace.test(statement || "")) {
+      const c = (statement || "").trim();
+      q += `@statement:(${c}*)`;
+    }
+    if (!whitespace.test(source || "")) {
+      const c = (source || "").trim();
+      q += `@source:(${c})`;
+    }
+    setQuery(q);
+  }, [statement, source]);
 
   const queryExample = (q: string) => (
     <span
@@ -47,16 +63,42 @@ export default function Search() {
         You can also mix and match all of the above, such as{" "}
         {queryExample("@source:(JBMO) @statement:(equi*) *gle")}
       </p>
+      <div className="border-gray-200 rounded-lg p-3 my-2 border">
+        <h2 className="font-extrabold text-xl">Query Helper</h2>
+        <label className="flex justify-between items-center">
+          <span className="inline mr-3">Problem Source</span>
+          <input
+            type="text"
+            placeholder="Problem Source"
+            onChange={(e) => {
+              e.preventDefault();
+              setSource(e.target.value);
+            }}
+            className="w-9/12 rounded-md my-1 inline-block"
+          />
+        </label>
+        <label className="flex justify-between items-center">
+          <span className="inline mr-3">Problem Statement</span>
+          <input
+            type="text"
+            placeholder="Problem Statement"
+            onChange={(e) => {
+              e.preventDefault();
+              setStatement(e.target.value);
+            }}
+            className="w-9/12 rounded-md my-1 inline-block"
+          />
+        </label>
+      </div>
       <input
         type="text"
         value={query}
-        placeholder="Search for Problems"
+        placeholder="Raw Query"
         onChange={(e) => {
           e.preventDefault();
           setQuery(e.target.value);
         }}
-        //className="w-[300px] sm:w-[400px] md:w-[600px] rounded-md"
-        className="w-full rounded-md"
+        className="w-full rounded-md my-1"
       />
       {error ? <p className="text-red-600 my-2">{error}</p> : null}
       <div className="w-full">
