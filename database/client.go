@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"regexp"
 
+	"github.com/MAA-Contest-Tester/search/scrape"
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/google/uuid"
-	"github.com/MAA-Contest-Tester/search/scrape"
 )
 
 var logger = log.New(os.Stderr, "[Redis Client]  ", 0);
@@ -39,7 +40,12 @@ func (c *SearchClient) AddProblems(problems []scrape.Problem) {
   }
 
   docs := make([]redisearch.Document, 0);
+  whitespace := regexp.MustCompile(`^\s*$`);
   for _,p := range problems {
+    // do not include problems in the database that contain literally nothing.
+    if whitespace.Match([]byte(p.Statement)) || whitespace.Match([]byte(p.Solution)) {
+      continue
+    }
     doc := redisearch.NewDocument(uuid.NewString(), problemScore(p));
     doc.Set("url", p.Url).
         Set("statement", p.Statement).

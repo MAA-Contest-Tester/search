@@ -51,9 +51,8 @@ export default function Result(props: {
     }
   });
   return (
-    // md:w-[600px] sm:w-[400px] w-[300px]
     <div className="my-5 p-3 border-gray-200 border rounded-lg w-full">
-      <div className="flex flex-wrap flex-row">
+      <div className="flex flex-wrap flex-row justify-between">
         <a
           href={props.url}
           target="_blank"

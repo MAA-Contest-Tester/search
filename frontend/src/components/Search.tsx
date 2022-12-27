@@ -43,7 +43,7 @@ export default function Search() {
 
   const queryExample = (q: string) => (
     <span
-      className="underline rounded-md hover:text-blue-800 decoration-blue-800 inline-block font-mono"
+      className="underline rounded-md hover:text-blue-800 decoration-blue-800 inline font-mono"
       onClick={() => setQuery(q)}
     >
       {q}
@@ -51,7 +51,7 @@ export default function Search() {
   );
   return (
     <>
-      <p className="my-3 mx-0 text-xs max-w-fit">
+      <p className="my-3 mx-0 text-xs sm:text-sm max-w-fit">
         Type the text you want to search for (e.g. {queryExample("complex")} or{" "}
         {queryExample("polynomial")}), or you can use redisearch's querying
         capabilities. For example, to just search for AIME problems, you might
@@ -69,7 +69,7 @@ export default function Search() {
           <span className="inline mr-3">Problem Source</span>
           <input
             type="text"
-            placeholder="Problem Source"
+            placeholder="Problem Source (Contest, Year, Number)"
             onChange={(e) => {
               e.preventDefault();
               setSource(e.target.value);
@@ -81,7 +81,7 @@ export default function Search() {
           <span className="inline mr-3">Problem Statement</span>
           <input
             type="text"
-            placeholder="Problem Statement"
+            placeholder="Type text that matches your problem."
             onChange={(e) => {
               e.preventDefault();
               setStatement(e.target.value);
@@ -102,9 +102,9 @@ export default function Search() {
       />
       {error ? <p className="text-red-600 my-2">{error}</p> : null}
       <div className="w-full">
-        {results.map((el, i) => (
-          <Result key={i} {...el} />
-        ))}
+        {results.length
+          ? results.map((el, i) => <Result key={i} {...el} />)
+          : null}
       </div>
     </>
   );
