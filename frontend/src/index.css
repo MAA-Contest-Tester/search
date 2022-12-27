@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+main {
+  @apply p-3 mx-auto;
+}
+
+a {
+  @apply underline decoration-blue-800 hover:text-blue-800;
+}
+
+.clamp {
+  width: clamp(10%, 700px, 100%);
+}
