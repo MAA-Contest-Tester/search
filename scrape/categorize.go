@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type Addition struct {
@@ -56,7 +57,10 @@ func Categorize(solution_url string) string {
 	url := fmt.Sprintf(
 		"https://artofproblemsolving.com/wiki/api.php?action=parse&format=json&page=%v", page,
 	)
-	resp, err := http.Get(url)
+	client := http.Client{
+		Timeout: time.Minute * 20,
+	}
+	resp, err := client.Get(url)
 	if err != nil || resp.StatusCode != 200 {
 		return ""
 	}
