@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/MAA-Contest-Tester/search/scrape"
-	"github.com/MAA-Contest-Tester/search/search"
+	"github.com/MAA-Contest-Tester/search/database"
 	"github.com/MAA-Contest-Tester/search/server"
 );
 
@@ -24,7 +24,7 @@ func main() {
       break;
     case "load":
       res := scrape.ScrapeList(scrape.ScrapeContestDefaults());
-      client := search.Client();
+      client := database.Client();
       log.Println("Inserting into Redis...");
       client.AddProblems(res);
       log.Println("Done");

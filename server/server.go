@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/MAA-Contest-Tester/search/search"
+	"github.com/MAA-Contest-Tester/search/database"
 )
 
-var client *search.SearchClient;
+var client *database.SearchClient;
 var logger = log.New(os.Stderr, "[HTTP Server]  ", 0);
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 func InitServer(path *string) *http.ServeMux {
   mux := http.NewServeMux();
-  client = search.Client();
+  client = database.Client();
   if path != nil {
     fileserver := http.FileServer(http.Dir(*path));
     mux.Handle("/", fileserver);
