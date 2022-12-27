@@ -97,12 +97,12 @@ func main() {
 	case "server":
 		start_server()
 	default:
-		fmt.Println(scrape.Categorize("https://artofproblemsolving.com/wiki/index.php/2017_AMC_12B_Problems/Problem_16"))
+		//fmt.Println(scrape.Categorize("https://artofproblemsolving.com/wiki/index.php/2017_AMC_12B_Problems/Problem_16"))
 		/*
-		res := scrape.ScrapeAops("https://artofproblemsolving.com/wiki/index.php/2021_USAJMO_Problems")
-			b,_ := json.MarshalIndent(res, "", "  ");
-			fmt.Println(string(b));
-			*/
-		//log.Fatal("Not a valid command. Must be one of 'load', 'dataset', and 'server'.")
+			res := scrape.ScrapeAops("https://artofproblemsolving.com/wiki/index.php/2021_USAJMO_Problems")
+				b,_ := json.MarshalIndent(res, "", "  ");
+				fmt.Println(string(b));
+		*/
+		log.Fatal("Not a valid command. Must be one of 'load', 'dataset', and 'server'.")
 	}
 }

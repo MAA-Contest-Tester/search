@@ -11,11 +11,11 @@ import (
 )
 
 type Problem struct {
-	Url       string `json:"url"`
-	Source    string `json:"source"`
-	Statement string `json:"statement"`
-	Solution  string `json:"solution"`
-	Categories  string `json:"categories"`
+	Url        string `json:"url"`
+	Source     string `json:"source"`
+	Statement  string `json:"statement"`
+	Solution   string `json:"solution"`
+	Categories string `json:"categories"`
 }
 
 var statement_tags = []string{"p", "ol", "ul", "center"}
@@ -122,21 +122,21 @@ func ScrapeAops(url string) []Problem {
 		int
 		string
 	}
-	categories := make(chan categoryResult, len(res));
-	w := sync.WaitGroup{};
+	categories := make(chan categoryResult, len(res))
+	w := sync.WaitGroup{}
 	for i := 0; i < len(res); i++ {
-		w.Add(1);
+		w.Add(1)
 		go func(i int, url string, c chan categoryResult, wg *sync.WaitGroup) {
-			c <- categoryResult{i, Categorize(url)};
-			wg.Done();
+			c <- categoryResult{i, Categorize(url)}
+			wg.Done()
 		}(i, res[i].Solution, categories, &w)
 	}
-	w.Wait();
+	w.Wait()
 	close(categories)
-	i := 0;
+	i := 0
 	for category := range categories {
-		res[category.int].Categories = category.string;
-		i++;
+		res[category.int].Categories = category.string
+		i++
 	}
 	return res
 }
