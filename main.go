@@ -92,13 +92,15 @@ func main() {
 	switch os.Args[1] {
 	case "dump":
 		dump_dataset()
-		break
 	case "load":
 		load_dataset()
-		break
 	case "server":
 		start_server()
 	default:
-		log.Fatal("Not a valid command. Must be one of 'load', 'dataset', and 'server'.")
+		fmt.Println(scrape.Categorize("https://artofproblemsolving.com/wiki/index.php/2021_USAJMO_Problems/Problem_2"))
+		res := scrape.ScrapeAops("https://artofproblemsolving.com/wiki/index.php/2021_USAJMO_Problems")
+			b,_ := json.MarshalIndent(res, "", "  ");
+			fmt.Println(string(b));
+		//log.Fatal("Not a valid command. Must be one of 'load', 'dataset', and 'server'.")
 	}
 }

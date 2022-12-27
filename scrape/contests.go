@@ -1,9 +1,10 @@
 package scrape
 
 import (
-	"github.com/gocolly/colly"
 	"regexp"
 	"sync"
+
+	"github.com/gocolly/colly"
 )
 
 type source struct {

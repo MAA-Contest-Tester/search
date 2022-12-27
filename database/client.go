@@ -48,7 +48,8 @@ func (c *SearchClient) AddProblems(problems []scrape.Problem) {
 		AddField(redisearch.NewTextField("url")).
 		AddField(redisearch.NewTextField("statement")).
 		AddField(redisearch.NewTextField("solution")).
-		AddField(redisearch.NewTextField("source"))
+		AddField(redisearch.NewTextField("source")).
+		AddField(redisearch.NewTextField("categories"))
 	c.client.Drop()
 	if err := c.client.CreateIndex(schema); err != nil {
 		logger.Fatal(err)
@@ -65,7 +66,8 @@ func (c *SearchClient) AddProblems(problems []scrape.Problem) {
 		doc.Set("url", p.Url).
 			Set("statement", p.Statement).
 			Set("solution", p.Solution).
-			Set("source", p.Source)
+			Set("source", p.Source).
+			Set("categories", p.Categories)
 		docs = append(docs, doc)
 	}
 	if err := c.client.Index(docs...); err != nil {

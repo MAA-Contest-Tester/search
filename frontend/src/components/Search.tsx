@@ -5,6 +5,7 @@ import { debounce } from 'debounce';
 export default function Search() {
 	const [statement, setStatement] = useState<string>();
 	const [source, setSource] = useState<string>();
+	const [categories, setCategories] = useState<string>();
 	const [query, setQuery] = useState('');
 	const [error, setError] = useState<any | null>(null);
 	const [results, setResults] = useState<any[]>([]);
@@ -38,8 +39,12 @@ export default function Search() {
 			const c = (source || '').trim();
 			q += `@source:(${c})`;
 		}
+		if (!whitespace.test(categories || '')) {
+			const c = (categories || '').trim();
+			q += `@categories:(${c})`;
+		}
 		setQuery(q);
-	}, [statement, source]);
+	}, [statement, source, categories]);
 
 	const queryExample = (q: string) => (
 		<button
@@ -85,6 +90,18 @@ export default function Search() {
 						onChange={(e) => {
 							e.preventDefault();
 							setStatement(e.target.value);
+						}}
+						className='w-full rounded-md my-1 inline-block col-span-2 md:col-span-3'
+					/>
+				</label>
+				<label className='grid grid-cols-3 md:grid-cols-4 items-center'>
+					<span className='inline mr-3 col-span-1'>Categories</span>
+					<input
+						type='text'
+						placeholder='Categories or Level (e.g. Geometry, Intermediate, Olympiad...)'
+						onChange={(e) => {
+							e.preventDefault();
+							setCategories(e.target.value);
 						}}
 						className='w-full rounded-md my-1 inline-block col-span-2 md:col-span-3'
 					/>

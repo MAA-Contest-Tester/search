@@ -4,6 +4,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -14,6 +15,7 @@ type Problem struct {
 	Source    string `json:"source"`
 	Statement string `json:"statement"`
 	Solution  string `json:"solution"`
+	Categories  string `json:"categories"`
 }
 
 var statement_tags = []string{"p", "ol", "ul", "center"}
@@ -44,7 +46,7 @@ func makeSource(url string) string {
 
 func ScrapeAops(url string) []Problem {
 	c := colly.NewCollector()
-	c.SetRequestTimeout(time.Second * 30)
+	c.SetRequestTimeout(time.Minute * 10)
 	latex_replace := func(_ int, b *colly.HTMLElement) {
 		alt := b.Attr("alt")
 		b.DOM.SetText(alt)
@@ -109,9 +111,32 @@ func ScrapeAops(url string) []Problem {
 
 	// remove asymptote code
 	asy_remove_regex := regexp.MustCompile(`\[asy\].*?\[/asy\]`)
+
 	for i := 0; i < len(res); i++ {
 		res[i].Statement = asy_remove_regex.ReplaceAllString(res[i].Statement, "")
 		res[i].Statement = strings.TrimSpace(res[i].Statement)
+	}
+
+	// make categorization concurrent.
+	type categoryResult struct {
+		int
+		string
+	}
+	categories := make(chan categoryResult, len(res));
+	w := sync.WaitGroup{};
+	for i := 0; i < len(res); i++ {
+		w.Add(1);
+		go func(i int, url string, c chan categoryResult, wg *sync.WaitGroup) {
+			c <- categoryResult{i, Categorize(url)};
+			wg.Done();
+		}(i, res[i].Solution, categories, &w)
+	}
+	w.Wait();
+	close(categories)
+	i := 0;
+	for category := range categories {
+		res[category.int].Categories = category.string;
+		i++;
 	}
 	return res
 }
