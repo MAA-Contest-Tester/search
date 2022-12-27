@@ -6,7 +6,7 @@ import './index.css';
 
 function App() {
 	return (
-		<div className='w-full p-2'>
+		<div className='w-full min-h-screen p-2'>
 			<main className='clamp mx-auto'>
 				<h1 className='font-extrabold text-3xl sm:text-4xl md:text-5xl'>
 					<span className='text-blue-800'>Search.</span>

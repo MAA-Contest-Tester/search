@@ -59,14 +59,18 @@ export default function Search() {
 			<p className='my-3 mx-0 text-xs sm:text-sm max-w-fit'>
 				Type the text you want to search for (e.g. {queryExample('complex')} or{' '}
 				{queryExample('polynomial')}), or you can use redisearch's querying
-				capabilities. For example, to just search for AIME problems, you might
-				do {queryExample('@source:(AIME)')}. To search for AMC 10 Problems with
-				"mean", search {queryExample('@source:(AMC 10) mean')}. Or for USAMO or
-				USAJMO Problems with "prove cyclic" in their statement, search{' '}
-				{queryExample('@source:(USAMO|USAJMO) @statement:(prove cyclic)')}.
-				Wildcard searching is also allowed, such as {queryExample('*count*')}.
+				capabilities. For example, to just search for AIME introductory
+				problems, you might do{' '}
+				{queryExample('@source:(AIME) @categories:(easy)')}. To search for AMC
+				10 Problems with "mean", search {queryExample('@source:(AMC 10) mean')}.
+				Or for USAMO or USAJMO Geometry Problems with "prove cyclic" in their
+				statement, search{' '}
+				{queryExample(
+					'@source:(USAMO|USAJMO) @categories:(geo) @statement:(prove cyclic)'
+				)}
+				. Wildcard searching is also allowed, such as {queryExample('*count*')}.
 				You can also mix and match all of the above, such as{' '}
-				{queryExample('@source:(JBMO) @statement:(equi*) *gle')}
+				{queryExample('@source:(*MO) @statement:(equi*) *gle')}
 			</p>
 			<div className='border-gray-200 rounded-lg p-3 my-2 border'>
 				<h2 className='font-extrabold text-xl'>Query Helper</h2>
