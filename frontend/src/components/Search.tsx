@@ -69,7 +69,7 @@ export default function Search() {
           <span className="inline mr-3">Problem Source</span>
           <input
             type="text"
-            placeholder="Problem Source (Contest, Year, Number)"
+            placeholder="Source (e.g. Contest Name, Year, Problem Number)"
             onChange={(e) => {
               e.preventDefault();
               setSource(e.target.value);
@@ -81,7 +81,7 @@ export default function Search() {
           <span className="inline mr-3">Problem Statement</span>
           <input
             type="text"
-            placeholder="Type text that matches your problem."
+            placeholder="Text that matches your problem"
             onChange={(e) => {
               e.preventDefault();
               setStatement(e.target.value);

@@ -31,7 +31,6 @@ const macros = {
   "\\textdollar": "\\$",
   "\\overarc": "\\overgroup",
   "\\dfrac": "\\frac",
-  "\\ ": " ",
   "\\O": "\\empty",
 };
 
@@ -39,6 +38,7 @@ export default function Result(props: {
   statement?: string;
   solution?: string;
   url?: string;
+  source?: string;
 }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -58,9 +58,7 @@ export default function Result(props: {
           target="_blank"
           className="mx-3 font-bold text-base"
         >
-          {props.url
-            ?.split("index.php/")[1]
-            .replace(new RegExp("[#_]", "g"), " ")}
+          {props.source?.replace(new RegExp("Problems Problem"), "Problem")}
         </a>
         <a
           href={props.solution}

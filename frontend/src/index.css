@@ -13,3 +13,7 @@ a {
 .clamp {
   width: clamp(10%, 700px, 100%);
 }
+
+html {
+  overflow-y: scroll;
+}
