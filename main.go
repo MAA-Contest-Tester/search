@@ -12,6 +12,7 @@ import (
 	"github.com/MAA-Contest-Tester/search/database"
 	"github.com/MAA-Contest-Tester/search/scrape"
 	"github.com/MAA-Contest-Tester/search/server"
+	"github.com/spf13/cobra"
 )
 
 func fileExists(path string) {
@@ -21,10 +22,8 @@ func fileExists(path string) {
 	}
 }
 
-func start_server() {
-	dir := (*string)(nil)
-	if len(os.Args) >= 3 {
-		dir = &os.Args[2]
+func start_server(dir *string) {
+	if dir != nil {
 		fileExists(*dir)
 	}
 	mux := server.InitServer(dir)
@@ -32,11 +31,9 @@ func start_server() {
 	http.ListenAndServe(":7827", mux)
 }
 
-func load_dataset() {
-	jsonfile := (*string)(nil)
+func load_dataset(jsonfile *string) {
 	var dataset []scrape.Problem
-	if len(os.Args) >= 3 {
-		jsonfile = &os.Args[2]
+	if jsonfile != nil {
 		fileExists(*jsonfile)
 		data, err := os.ReadFile(*jsonfile)
 		if err != nil {
@@ -58,9 +55,9 @@ func load_dataset() {
 	log.Println("Done")
 }
 
-func dump_dataset() {
+func dump_dataset(filename *string) {
 	var out io.Writer = os.Stdout
-	if len(os.Args) >= 3 {
+	if filename != nil {
 		filename := os.Args[2]
 		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 		if err != nil {
@@ -85,18 +82,28 @@ func dump_dataset() {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "Not enough Arguments. The first command must be one of {dump,load,server}\n")
-		os.Exit(1)
-	}
-	switch os.Args[1] {
-	case "dump":
-		dump_dataset()
-	case "load":
-		load_dataset()
-	case "server":
-		start_server()
-	default:
-		log.Fatal("Not a valid command. Must be one of 'load', 'dataset', and 'server'.")
-	}
+	dump := &cobra.Command{Use: "dump [file]", Aliases: []string{"d"}, Run: func(cmd *cobra.Command, args []string) {
+		if len(args) >= 1 {
+		dump_dataset(&args[0]);
+		} else {
+		dump_dataset(nil);
+		}
+	}};
+	load := &cobra.Command{Use: "load [file]", Aliases: []string{"l"}, Run:func(cmd *cobra.Command, args []string) {
+		if len(args) >= 1 {
+		load_dataset(&args[0]);
+		} else {
+		load_dataset(nil);
+		}
+	}};
+	server := &cobra.Command{Use: "server [dir]", Aliases: []string{"s"}, Run:func(cmd *cobra.Command, args []string) {
+		if len(args) >= 1 {
+		start_server(&args[0]);
+		} else {
+		start_server(nil);
+		}
+	}};
+	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"};
+	root.AddCommand(dump, load, server);
+	root.Execute();
 }
