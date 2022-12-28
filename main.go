@@ -84,26 +84,26 @@ func dump_dataset(filename *string) {
 func main() {
 	dump := &cobra.Command{Use: "dump [file]", Aliases: []string{"d"}, Run: func(cmd *cobra.Command, args []string) {
 		if len(args) >= 1 {
-		dump_dataset(&args[0]);
+			dump_dataset(&args[0])
 		} else {
-		dump_dataset(nil);
+			dump_dataset(nil)
 		}
-	}};
-	load := &cobra.Command{Use: "load [file]", Aliases: []string{"l"}, Run:func(cmd *cobra.Command, args []string) {
+	}}
+	load := &cobra.Command{Use: "load [file]", Aliases: []string{"l"}, Run: func(cmd *cobra.Command, args []string) {
 		if len(args) >= 1 {
-		load_dataset(&args[0]);
+			load_dataset(&args[0])
 		} else {
-		load_dataset(nil);
+			load_dataset(nil)
 		}
-	}};
-	server := &cobra.Command{Use: "server [dir]", Aliases: []string{"s"}, Run:func(cmd *cobra.Command, args []string) {
+	}}
+	server := &cobra.Command{Use: "server [dir]", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {
 		if len(args) >= 1 {
-		start_server(&args[0]);
+			start_server(&args[0])
 		} else {
-		start_server(nil);
+			start_server(nil)
 		}
-	}};
-	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"};
-	root.AddCommand(dump, load, server);
-	root.Execute();
+	}}
+	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"}
+	root.AddCommand(dump, load, server)
+	root.Execute()
 }
