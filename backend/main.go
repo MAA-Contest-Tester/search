@@ -9,9 +9,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/MAA-Contest-Tester/search/database"
-	"github.com/MAA-Contest-Tester/search/scrape"
-	"github.com/MAA-Contest-Tester/search/server"
+	"github.com/MAA-Contest-Tester/search/backend/database"
+	"github.com/MAA-Contest-Tester/search/backend/scrape"
+	"github.com/MAA-Contest-Tester/search/backend/server"
 	"github.com/spf13/cobra"
 )
 

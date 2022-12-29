@@ -6,7 +6,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/MAA-Contest-Tester/search/scrape"
+	"github.com/MAA-Contest-Tester/search/backend/scrape"
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/google/uuid"
 )

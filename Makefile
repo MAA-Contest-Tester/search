@@ -7,7 +7,7 @@ endif
 
 out/psearch:
 	mkdir -p out
-	go build $(FLAGS) -o out/psearch
+	go build $(FLAGS) -o out/psearch ./backend
 
 clean:
 	rm -rf out/psearch

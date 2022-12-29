@@ -3,15 +3,12 @@ package server
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"os"
 
-	"github.com/MAA-Contest-Tester/search/database"
+	"github.com/MAA-Contest-Tester/search/backend/database"
 )
 
 var client *database.SearchClient
-var logger = log.New(os.Stderr, "[HTTP Server]  ", 0)
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "API Reached!")

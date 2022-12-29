@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/MAA-Contest-Tester/search/scrape"
+	"github.com/MAA-Contest-Tester/search/backend/scrape"
 )
 
 func problemScore(p scrape.Problem) float32 {
