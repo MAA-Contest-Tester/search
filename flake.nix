@@ -1,5 +1,5 @@
 {
-  description = "AoPS Search";
+  description = "Search.MAATester.com";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
     flake-utils = {
@@ -14,7 +14,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
         version = "0.1.0";
-        name = "package name";
+        name = "Search.MAATester.com";
       in {
 
         devShell = pkgs.mkShell { buildInputs = with pkgs; [ go yarn scc ]; };
