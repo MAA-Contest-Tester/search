@@ -17,14 +17,16 @@ type SearchClient struct {
 	client *redisearch.Client
 }
 
-func Client() *SearchClient {
-	db_host := ""
+func ClientHost() string {
 	if host, exists := os.LookupEnv("REDIS"); exists {
-		db_host = host
+		return host
 	} else {
-		db_host = "localhost:6379"
+		return "localhost:6379"
 	}
-	client := redisearch.NewClient(db_host, "Problems")
+}
+
+func Client() *SearchClient {
+	client := redisearch.NewClient(ClientHost(), "Problems")
 	return &SearchClient{client: client}
 }
 

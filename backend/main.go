@@ -22,15 +22,6 @@ func fileExists(path string) {
 	}
 }
 
-func start_server(dir *string) {
-	if dir != nil {
-		fileExists(*dir)
-	}
-	mux := server.InitServer(dir)
-	log.Println("Running server on port 7827...")
-	http.ListenAndServe(":7827", mux)
-}
-
 func load_dataset(jsonfile *string) {
 	var dataset []scrape.Problem
 	if jsonfile != nil {
@@ -81,6 +72,18 @@ func dump_dataset(filename *string) {
 	}
 }
 
+func start_server(dir *string, port int, load string) {
+	if dir != nil {
+		fileExists(*dir)
+	}
+	if len(load) > 0 {
+		load_dataset(&load);
+	}
+	mux := server.InitServer(dir)
+	log.Printf("Running server on port %v...", port)
+	http.ListenAndServe(":" + fmt.Sprint(port), mux)
+}
+
 func main() {
 	dump := &cobra.Command{Use: "dump [file]", Aliases: []string{"d"}, Run: func(cmd *cobra.Command, args []string) {
 		if len(args) >= 1 {
@@ -96,13 +99,20 @@ func main() {
 			load_dataset(nil)
 		}
 	}}
-	server := &cobra.Command{Use: "server [dir]", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {
-		if len(args) >= 1 {
-			start_server(&args[0])
+	server := &cobra.Command{Use: "server", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {
+		port, _ := cmd.Flags().GetInt("port")
+		load,_ := cmd.Flags().GetString("load")
+		dir,_ := cmd.Flags().GetString("dir")
+		if len(dir) > 0 {
+			start_server(&dir, port, load)
 		} else {
-			start_server(nil)
+			start_server(nil, port, load)
 		}
 	}}
+	server.Flags().IntP("port", "P", 7827, "Port to use")
+	server.Flags().StringP("load", "L", "", "File to load once connected to Redis");
+	server.Flags().StringP("dir", "D", "", "Generated directory to store");
+
 	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"}
 	root.AddCommand(dump, load, server)
 	root.Execute()

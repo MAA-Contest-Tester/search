@@ -12,4 +12,5 @@ out/psearch:
 clean:
 	rm -rf out/psearch
 
+all: out/psearch
 make: out/psearch

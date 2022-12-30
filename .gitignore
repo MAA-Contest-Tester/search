@@ -26,3 +26,5 @@ go.work
 /search
 *.log
 package-lock.json
+/yarn.lock
+node_modules
