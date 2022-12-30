@@ -1,8 +1,7 @@
 version: '2'
 services:
   web:
-    build: .
-    #image: junikimm717/psearch:latest
+    image: junikimm717/psearch:latest
     ports:
       - "7827:7827"
     environment:

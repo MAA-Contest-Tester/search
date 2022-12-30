@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gocolly/colly"
+	//"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/html"
 )
 
 type Problem struct {
@@ -63,8 +65,16 @@ func ScrapeAops(url string) []Problem {
 		}
 		// replace all images with latex form.
 		el.ForEach(selector, func(idx int, content *colly.HTMLElement) {
+			for _, node := range content.DOM.Nodes {
+				for child := node.FirstChild; child != nil; child = child.NextSibling {
+					if child.Type == html.TextNode {
+						child.Data = strings.ReplaceAll(child.Data, "$", `$\textdollar$`)
+					}
+				}
+			}
 			content.ForEach("img[alt]", latex_replace)
 		})
+		// remove all dollar signs.
 		// fill out res.
 		use_paragraph := false
 		el.ForEach(selector, func(idx int, content *colly.HTMLElement) {
