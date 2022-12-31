@@ -20,12 +20,13 @@ export default function About() {
       <p className="mt-3">
         Supports{" "}
         <strong>
-          AJHSME, AHSME, AMC 8, AMC 10, AMC 12, AIME, USAJMO, USAMO, JBMO, and
-          IMO.
+          AJHSME, AHSME, AMC 8, AMC 10, AMC 12, AIME, USAJMO, USAMO, JBMO,
+          Balkan MO, USA Team Selection Test, USA TSTST, China TST, EGMO, IMO,
+          IMO Shortlist, and APMO.
         </strong>
       </p>
       <p>
-        Over <strong>6500</strong> Problems.
+        Over <strong>9000</strong> Problems.
       </p>
     </div>
   );

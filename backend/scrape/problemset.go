@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gocolly/colly"
-	//"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
 )
 

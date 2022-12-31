@@ -41,7 +41,7 @@ export default function Search() {
     }
     if (!whitespace.test(categories || "")) {
       const c = (categories || "").trim();
-      q += `@categories:(${c})`;
+      q += `@categories:(${c}*)`;
     }
     setQuery(q);
   }, [statement, source, categories]);

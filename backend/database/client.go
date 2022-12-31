@@ -40,6 +40,11 @@ Stopword List:
 	}
 */
 
+func (c *SearchClient) Drop() {
+	logger.Println("Dropping Database...")
+	c.client.Drop()
+}
+
 func (c *SearchClient) AddProblems(problems []scrape.Problem) {
 	options := redisearch.DefaultOptions.SetStopWords([]string{
 		"a", "is", "the", "an", "and", "as", "at", "be", "but", "by",
@@ -52,9 +57,9 @@ func (c *SearchClient) AddProblems(problems []scrape.Problem) {
 		AddField(redisearch.NewTextField("solution")).
 		AddField(redisearch.NewTextField("source")).
 		AddField(redisearch.NewTextField("categories"))
-	c.client.Drop()
+
 	if err := c.client.CreateIndex(schema); err != nil {
-		logger.Fatal(err)
+		logger.Println(err);
 	}
 
 	docs := make([]redisearch.Document, 0)
