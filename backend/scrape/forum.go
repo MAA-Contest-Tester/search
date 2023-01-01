@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -30,13 +30,16 @@ func InitForumSession() ForumSession {
 	sessionre := regexp.MustCompile(`AoPS\.session = ({.*?})`)
 	//f := ForumClient{};
 	resp, err := http.Get("https://artofproblemsolving.com")
+	if err != nil {
+		logger.Fatal(err)
+	}
 	data := ForumSession{}
 	for _, c := range resp.Cookies() {
 		if c.Name == "aopssid" {
 			data.Sid = c.Value
 		}
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -186,7 +189,7 @@ func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
 	if err != nil {
 		logger.Println(err)
 	}
-	respbody, err := ioutil.ReadAll(resp.Body)
+	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.Println(err)
 		return nil, err
