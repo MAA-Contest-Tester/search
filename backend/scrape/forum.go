@@ -163,7 +163,15 @@ func parseProblemRenderedHTML(text string) (string, error) {
 		s.SetText(s.AttrOr("alt", ""))
 	})
 	doc.Find("img[src].asy-image").Each(func(i int, s *goquery.Selection) {
-		s.SetText(fmt.Sprintf("%v", s.AttrOr("src", "")[2:]))
+		s.SetText(
+			fmt.Sprintf(
+				"$\\includegraphics[width=%v, height=%v, totalheight=%v]{https:%v}$",
+				reduceWidth(s.AttrOr("width", "")),
+				reduceWidth(s.AttrOr("height", "")),
+				reduceWidth(s.AttrOr("height", "")),
+				s.AttrOr("src", ""),
+			),
+		)
 	})
 	t := doc.Text()
 	return t, nil

@@ -1,8 +1,10 @@
 package scrape
 
 import (
+	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -45,12 +47,37 @@ func makeSource(url string) string {
 	return re.ReplaceAllString(last, " ")
 }
 
+func reduceWidth(attr string) string {
+	value, err := strconv.Atoi(attr)
+	if err != nil {
+		return attr
+	} else {
+		return strconv.Itoa(value / 2)
+	}
+}
+
 func ScrapeAops(url string) []Problem {
 	c := colly.NewCollector()
 	c.SetRequestTimeout(time.Minute * 10)
+
+	// asymptote regexp
+	asy_regex := regexp.MustCompile(`\s*\[asy\].*?\[/asy\]\s*`)
+
 	latex_replace := func(_ int, b *colly.HTMLElement) {
 		alt := b.Attr("alt")
-		b.DOM.SetText(alt)
+		if asy_regex.MatchString(alt) {
+			b.DOM.SetText(
+				fmt.Sprintf(
+					"$\\includegraphics[width=%v, height=%v, totalheight=%v]{https:%v}$",
+					reduceWidth(b.Attr("width")),
+					reduceWidth(b.Attr("height")),
+					reduceWidth(b.Attr("height")),
+					b.Attr("src"),
+				),
+			)
+		} else {
+			b.DOM.SetText(alt)
+		}
 	}
 
 	httperror := false
@@ -118,11 +145,7 @@ func ScrapeAops(url string) []Problem {
 	c.Visit(url)
 	c.Wait()
 
-	// remove asymptote code
-	asy_remove_regex := regexp.MustCompile(`\[asy\].*?\[/asy\]`)
-
 	for i := 0; i < len(res); i++ {
-		res[i].Statement = asy_remove_regex.ReplaceAllString(res[i].Statement, "")
 		res[i].Statement = strings.TrimSpace(res[i].Statement)
 	}
 

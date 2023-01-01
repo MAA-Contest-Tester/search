@@ -16,6 +16,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("query")
+	w.Header().Add("Content-Type", "application/json")
 	if q != "" {
 		res, err := client.Search(q)
 		if err != nil {

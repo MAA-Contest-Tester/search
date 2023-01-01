@@ -52,11 +52,12 @@ export default function About() {
       <p className="mt-3">
         Over <strong>14000</strong> Problems. Supported Contests:
       </p>
-      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 mx-0 border-blue-800 border p-1 rounded-lg">
-        {supported.map((contest) => (
+      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 mx-0 border-gray-200 border p-1 rounded-lg">
+        {supported.map((contest, i) => (
           <a
             className="p-[1px] font-bold"
             href={`https://artofproblemsolving.com/community/c${contest[1]}`}
+            key={i}
           >
             {contest[0]}
           </a>
