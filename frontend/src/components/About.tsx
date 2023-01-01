@@ -34,8 +34,8 @@ export default function About() {
   return (
     <div className="my-3 mx-0 text-sm">
       <p>
-        A fast search engine for browsing math problems to try. All problems
-        scraped from the AoPS wiki.
+        An instant search engine for math olympiad questions. Problems sourced
+        from the AoPS Wiki and Contests Page.
       </p>
       <p>
         {" "}

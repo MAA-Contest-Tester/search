@@ -159,7 +159,7 @@ func ScrapeAops(url string) []Problem {
 	for i := 0; i < len(res); i++ {
 		w.Add(1)
 		go func(i int, url string, c chan categoryResult, wg *sync.WaitGroup) {
-			c <- categoryResult{i, Categorize(url)}
+			c <- categoryResult{i, CategorizeWiki(url)}
 			wg.Done()
 		}(i, res[i].Solution, categories, &w)
 	}

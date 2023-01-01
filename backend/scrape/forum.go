@@ -126,7 +126,7 @@ func (resp *CategoryResponse) ToProblems() []Problem {
 		if announcement || label || notpost {
 			continue
 		}
-		res = append(res, Problem{
+		problem := Problem{
 			Url: fmt.Sprintf(
 				"https://artofproblemsolving.com/community/c%v",
 				resp.Response.Category.CategoryId,
@@ -144,8 +144,9 @@ func (resp *CategoryResponse) ToProblems() []Problem {
 				p.PostData.TopicId,
 				p.PostData.PostId,
 			),
-			Categories: modifyWithAdditions(front_label),
-		})
+		}
+		CategorizeForum(&problem)
+		res = append(res, problem)
 	}
 	return res
 }
