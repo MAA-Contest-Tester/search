@@ -98,7 +98,7 @@ type CategoryResponse struct {
 	Response struct {
 		Category struct {
 			CategoryId int `json:"category_id"`
-			Description string `json:"short_description"`
+			Name string `json:"category_name"`
 			Items []Post `json:"items"`
 		} `json:"category"`
 	} `json:"response"`
@@ -108,13 +108,11 @@ func (resp *CategoryResponse) ToProblems() []Problem {
 	items := resp.Response.Category.Items;
 	res := make([]Problem,0)
 	front_label := "";
-	front_label_spc := "";
 	for _,p := range items {
 		announcement := p.PostData.CategoryId == 75
 		label := p.PostData.CategoryId == resp.Response.Category.CategoryId
 		notpost := strings.ToLower(p.Type) != "post";
 		if label {
-			front_label_spc = p.PostData.Rendered + " ";
 			front_label = p.PostData.Rendered;
 		}
 		if announcement || label || notpost {
@@ -126,9 +124,9 @@ func (resp *CategoryResponse) ToProblems() []Problem {
 				resp.Response.Category.CategoryId,
 			),
 			Source: fmt.Sprintf(
-				"%v%v %v",
-				front_label_spc,
-				resp.Response.Category.Description,
+				"%v %v Problem %v",
+				resp.Response.Category.Name,
+				front_label,
 				p.Title,
 			),
 			Statement: p.PostData.Rendered,
