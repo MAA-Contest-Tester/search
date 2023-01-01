@@ -10,6 +10,7 @@ export default function About() {
     ["CHMMC", 2746308],
     ["CMIMC", 253928],
     ["HMMT", 3417],
+    ["Nov HMMT", 2881068],
     ["SMT", 3418],
     ["BMT", 2503467],
     ["PUMAC", 3426],

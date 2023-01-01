@@ -16,7 +16,6 @@ var wikicontests = []struct{ Url string; Search *regexp.Regexp }{
 	{Url: "AMC_8_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_(AMC_8|AJHSME)$`)},
 }
 
-//usajmo, usamo, imo, jbmo
 var forums = []int {
 	3412, // usamts
 	3409, // usamo
@@ -35,6 +34,7 @@ var forums = []int {
 	2746308, // chmmc
 	253928, // cmimc
 	3417, // hmmt,
+	2881068, // hmmt november
 	3418, // smt,
 	2503467, // bmt
 	3426, // pumac
