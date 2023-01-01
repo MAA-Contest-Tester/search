@@ -17,7 +17,7 @@
         name = "Search.MAATester.com";
       in {
 
-        devShell = pkgs.mkShell { buildInputs = with pkgs; [ go yarn scc ]; };
+        devShell = pkgs.mkShell { buildInputs = with pkgs; [ go yarn scc redis ]; };
 
         defaultPackage = pkgs.stdenv.mkDerivation { inherit name version; };
 

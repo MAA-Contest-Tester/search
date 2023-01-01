@@ -23,8 +23,8 @@ Run `cd ./frontend && yarn`
 
 ## Loading AoPS Data
 
-Run `go run ./backend/main.go load`; this will populate the redis database with problems
-scraped from AoPS.
+Run `go run ./backend/main.go load && go run ./backend/main.go load -F`; this
+will populate the redis database with problems scraped from AoPS.
 
 # Production
 

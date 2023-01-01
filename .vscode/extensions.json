@@ -1,3 +1,7 @@
 {
-    "recommendations": ["golang.go", "EditorConfig.EditorConfig"]
+	"recommendations": [
+		"golang.go",
+		"EditorConfig.EditorConfig",
+		"esbenp.prettier-vscode"
+	]
 }
