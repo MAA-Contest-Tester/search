@@ -13,14 +13,17 @@ var wikicontests = []struct{ Url string; Search *regexp.Regexp }{
 	{Url: "AMC_10_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}(_[A-Z,a-z]*?)?_AMC_10[AB]?$`)},
 	{Url: "AMC_12_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}(_[A-Z,a-z]*?)?_AMC_12[AB]?$`)},
 	{Url: "AHSME_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_AHSME$`)},
-	{Url: "USAJMO_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_USAJMO$`)},
-	{Url: "USAMO_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_USAMO$`)},
-	{Url: "IMO_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_IMO$`)},
-	{Url: "JBMO_Problems_and_Solutions,_with_authors", Search: regexp.MustCompile(`/index.php/\d{4}_JBMO$`)},
 	{Url: "AMC_8_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_(AMC_8|AJHSME)$`)},
 }
 
+//usajmo, usamo, imo, jbmo
 var forums = []int {
+	3412, // usamts
+	3409, // usamo
+	3420, // usajmo
+	3429, // elmo
+	3222, // imo
+	3227, // jbmo
 	3411, // usa tst
 	3424, // usa tstst
 	3282, // china tst
@@ -28,6 +31,14 @@ var forums = []int {
 	3226, // apmo
 	3246, // egmo
 	3225, // balkan mo
+
+	2746308, // chmmc
+	253928, // cmimc
+	3417, // hmmt,
+	3418, // smt,
+	2503467, // bmt
+	3426, // pumac
+	233906, // bamo
 }
 
 var redlink = regexp.MustCompile(`redlink=1`)

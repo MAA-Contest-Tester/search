@@ -62,9 +62,10 @@ export default function Result(props: {
       });
     }
   });
+  const preprocessed = preprocess(props.statement);
   return (
     <div className="my-5 p-3 border-gray-200 border rounded-lg w-full">
-      <div className="flex flex-wrap flex-row justify-between">
+      <div className="flex flex-wrap flex-row justify-between items-center">
         <a
           href={props.url}
           target="_blank"
@@ -79,12 +80,18 @@ export default function Result(props: {
         >
           See Solution
         </a>
+        <button
+          onClick={(_) => navigator.clipboard.writeText(preprocessed)}
+          className="mx-3 font-bold text-base hover:bg-blue-800 hover:text-white p-[2px] border-gray-200 rounded-lg border duration-200"
+        >
+          Copy
+        </button>
       </div>
       <div
         ref={ref}
-        className="whitespace-pre-wrap md:max-w-3xl sm:max-w-xl max-w-lg overflow-y-hidden overflow-x-auto p-1 text-sm"
+        className="whitespace-pre-wrap md:max-w-3xl sm:max-w-xl max-w-lg overflow-y-hidden overflow-x-auto p-1 text-sm select-text"
       >
-        {preprocess(props.statement)}
+        {preprocessed}
       </div>
     </div>
   );

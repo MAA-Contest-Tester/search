@@ -63,13 +63,10 @@ export default function Search() {
         problems, you might do{" "}
         {queryExample("@source:(AIME) @categories:(easy)")}. To search for AMC
         10 Problems with "mean", search {queryExample("@source:(AMC 10) mean")}.
-        Or for USAMO or USAJMO Geometry Problems with "prove cyclic" in their
-        statement, search{" "}
-        {queryExample(
-          "@source:(USAMO|USAJMO) @categories:(geo) @statement:(prove cyclic)"
-        )}
-        . Wildcard searching is also allowed, such as {queryExample("*count*")}.
-        You can also mix and match all of the above, such as{" "}
+        Or for Olympiad Geometry Problems with cyclics in their statement,
+        search {queryExample("@source:(*MO) @statement:(cyclic)")}. Wildcard
+        searching is also allowed, such as {queryExample("*count*")}. You can
+        also mix and match all of the above, such as{" "}
         {queryExample("@source:(*MO) @statement:(equi*) *gle")}
       </p>
       <div className="border-gray-200 rounded-lg p-3 my-2 border">

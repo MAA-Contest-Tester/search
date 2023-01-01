@@ -84,7 +84,7 @@ func (c *SearchClient) AddProblems(problems []scrape.Problem) {
 
 func (c *SearchClient) Search(query string) (string, error) {
 	q := redisearch.NewQuery(query)
-	docs, _, error := c.client.Search(q.Limit(0, 15))
+	docs, _, error := c.client.Search(q.Limit(0, 20))
 	if error != nil {
 		return "[]", error
 	}
