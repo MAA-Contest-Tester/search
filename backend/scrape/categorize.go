@@ -15,9 +15,12 @@ type Addition struct {
 	insert string
 }
 
-func insertAdditions(s string, additions []Addition) string {
+func insertAdditions(s string, additions []Addition, include bool) string {
 	s = strings.ToLower(s)
-	res := []string{s}
+	res := []string{}
+	if include {
+		res = []string{s}
+	}
 	for _, a := range additions {
 		if a.search.Match([]byte(s)) {
 			res = append(res, a.insert)
@@ -36,14 +39,21 @@ var categoryAdditions = []Addition{
 	{search: regexp.MustCompile("algebra|a[1-9]"), insert: "algebra"},
 	{search: regexp.MustCompile("inequality"), insert: "algebra bound"},
 	{search: regexp.MustCompile("trigonometry"), insert: "trig algebra geometry"},
+
+	// contest shortcuts
 	{search: regexp.MustCompile("imo shortlist|isl"), insert: "imo shortlist isl"},
+	{search: regexp.MustCompile("stanford mathematics"), insert: "smt"},
+	{search: regexp.MustCompile("princeton"), insert: "pumac"},
+	{search: regexp.MustCompile("harvard|mit"), insert: "hmmt"},
+	{search: regexp.MustCompile("team selection test|final round"), insert: "tst"},
+	{search: regexp.MustCompile("romanian master"), insert: "rmm"},
 }
 
 var statementAdditions = []Addition{
 	{search: regexp.MustCompile(`triangle|square|quadrilateral|cyclic|circum|incenter|acute`), insert: "geometry geo"},
 	{search: regexp.MustCompile(`gcd|prime|gcd|lcm|divisor`), insert: "number theory nt"},
-	{search: regexp.MustCompile(`[a-z]\^[2-9]|sequence|function|polynomial|inequality`), insert: "algebra alg"},
-	{search: regexp.MustCompile(`probability|choose|game|rows|columns`), insert: "algebra alg"},
+	{search: regexp.MustCompile(`[a-z]\^[2-9]|sequence|functions|polynomial|inequality`), insert: "algebra alg"},
+	{search: regexp.MustCompile(`probability|choose|game|rows|columns`), insert: "combinatorics combo"},
 }
 
 var splitSolutionURL = regexp.MustCompile(`index\.php|\?`)
@@ -91,11 +101,11 @@ func CategorizeWiki(solution_url string) string {
 	res := make([]string, 0)
 	for _, c := range data.Parse.Categories {
 		category := strings.ReplaceAll(c.Name, "_", " ")
-		res = append(res, insertAdditions(category, categoryAdditions))
+		res = append(res, insertAdditions(category, categoryAdditions, true))
 	}
 	return strings.Join(res, " ")
 }
 
 func CategorizeForum(problem *Problem) {
-	problem.Categories = insertAdditions(problem.Source, categoryAdditions) + insertAdditions(problem.Statement, statementAdditions)
+	problem.Categories = insertAdditions(problem.Source, categoryAdditions, false) + " " + insertAdditions(problem.Statement, statementAdditions, false)
 }

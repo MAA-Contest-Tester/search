@@ -1,5 +1,5 @@
 export default function About() {
-  const supported = [
+  const supported: [string, number][] = [
     ["AJHSME", 3413],
     ["AHSME", 3415],
     ["AMC 8", 3413],
@@ -16,6 +16,15 @@ export default function About() {
     ["PUMAC", 3426],
     ["BAMO", 233906],
     ["USAMTS", 3412],
+
+    ["RMM", 3238],
+    ["Canada MO", 3277],
+    ["Korea MO", 3383],
+    ["KJMO", 603052],
+    ["China MO", 3284],
+    ["China GMO", 3287],
+    ["China Round 2", 3288],
+    ["Korea TST", 3384],
 
     ["USAJMO", 3420],
     ["USAMO", 3409],
@@ -50,9 +59,9 @@ export default function About() {
         .
       </p>
       <p className="mt-3">
-        Over <strong>14000</strong> Problems. Supported Contests:
+        Over <strong>15000</strong> Problems. Supported Contests:
       </p>
-      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 mx-0 border-gray-200 border p-1 rounded-lg">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 mx-0 border-gray-200 border p-1 rounded-lg">
         {supported.map((contest, i) => (
           <a
             className="p-[1px] font-bold"
