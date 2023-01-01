@@ -136,7 +136,7 @@ func (resp *CategoryResponse) ToProblems() []Problem {
 				p.PostData.TopicId,
 				p.PostData.PostId,
 			),
-			Categories: front_label,
+			Categories: modifyWithAdditions(front_label),
 		});
 	}
 	return res;

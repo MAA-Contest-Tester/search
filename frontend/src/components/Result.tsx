@@ -65,14 +65,10 @@ export default function Result(props: {
   const preprocessed = preprocess(props.statement);
   return (
     <div className="my-5 p-3 border-gray-200 border rounded-lg w-full">
+      <a href={props.url} target="_blank" className="mx-3 font-bold text-base">
+        {props.source?.replace(new RegExp("Problems Problem"), "Problem")}
+      </a>
       <div className="flex flex-wrap flex-row justify-between items-center">
-        <a
-          href={props.url}
-          target="_blank"
-          className="mx-3 font-bold text-base"
-        >
-          {props.source?.replace(new RegExp("Problems Problem"), "Problem")}
-        </a>
         <a
           href={props.solution}
           target="_blank"

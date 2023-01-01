@@ -1,33 +1,33 @@
 export default function About() {
   const supported = [
-    "AJHSME",
-    "AHSME",
-    "AMC 8",
-    "AMC 10",
-    "AMC 12",
-    "AIME",
+    ["AJHSME", 3413],
+    ["AHSME", 3415],
+    ["AMC 8", 3413],
+    ["AMC 10", 3414],
+    ["AMC 12", 3415],
+    ["AIME", 3416],
 
-    "CHMMC",
-    "CMIMC",
-    "HMMT",
-    "SMT",
-    "BMT",
-    "PUMAC",
-    "BAMO",
-    "USAMTS",
+    ["CHMMC", 2746308],
+    ["CMIMC", 253928],
+    ["HMMT", 3417],
+    ["SMT", 3418],
+    ["BMT", 2503467],
+    ["PUMAC", 3426],
+    ["BAMO", 233906],
+    ["USAMTS", 3412],
 
-    "USAJMO",
-    "USAMO",
-    "JBMO",
-    "Balkan MO",
-    "USA TST",
-    "USA TSTST",
-    "China TST",
-    "EGMO",
-    "IMO",
-    "ELMO",
-    "APMO",
-    "IMO Shortlist",
+    ["USAJMO", 3420],
+    ["USAMO", 3409],
+    ["JBMO", 3227],
+    ["Balkan MO", 3225],
+    ["USA TST", 3411],
+    ["USA TSTST", 3424],
+    ["China TST", 3282],
+    ["EGMO", 3246],
+    ["IMO", 3222],
+    ["ELMO", 3429],
+    ["APMO", 3226],
+    ["IMO Shortlist", 3223],
   ];
   return (
     <div className="my-3 mx-0 text-sm">
@@ -50,9 +50,14 @@ export default function About() {
       <p className="mt-3">
         Over <strong>13000</strong> Problems. Supported Contests:
       </p>
-      <div className="grid grid-cols-7 mx-0 border-blue-800 border p-1 rounded-lg">
+      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 mx-0 border-blue-800 border p-1 rounded-lg">
         {supported.map((contest) => (
-          <div className="p-[1px] font-bold">{contest}</div>
+          <a
+            className="p-[1px] font-bold"
+            href={`https://artofproblemsolving.com/community/c${contest[1]}`}
+          >
+            {contest[0]}
+          </a>
         ))}
       </div>
     </div>
