@@ -8,7 +8,10 @@ import (
 	"github.com/gocolly/colly"
 )
 
-var wikicontests = []struct{ Url string; Search *regexp.Regexp }{
+var wikicontests = []struct {
+	Url    string
+	Search *regexp.Regexp
+}{
 	{Url: "AIME_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_AIME(_I{1,2})?$`)},
 	{Url: "AMC_10_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}(_[A-Z,a-z]*?)?_AMC_10[AB]?$`)},
 	{Url: "AMC_12_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}(_[A-Z,a-z]*?)?_AMC_12[AB]?$`)},
@@ -16,7 +19,7 @@ var wikicontests = []struct{ Url string; Search *regexp.Regexp }{
 	{Url: "AMC_8_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_(AMC_8|AJHSME)$`)},
 }
 
-var forums = []int {
+var forums = []int{
 	3412, // usamts
 	3409, // usamo
 	3420, // usajmo
@@ -30,15 +33,16 @@ var forums = []int {
 	3226, // apmo
 	3246, // egmo
 	3225, // balkan mo
+	3372, // sharygin
 
 	2746308, // chmmc
-	253928, // cmimc
-	3417, // hmmt,
+	253928,  // cmimc
+	3417,    // hmmt,
 	2881068, // hmmt november
-	3418, // smt,
+	3418,    // smt,
 	2503467, // bmt
-	3426, // pumac
-	233906, // bamo
+	3426,    // pumac
+	233906,  // bamo
 }
 
 var redlink = regexp.MustCompile(`redlink=1`)
@@ -84,38 +88,38 @@ func ScrapeWikiDefaults() []Problem {
 	for x := range channel {
 		res = append(res, x...)
 	}
-	return ScrapeWikiList(res);
+	return ScrapeWikiList(res)
 }
 
 func (session *ForumSession) scrapeForumPage(id int) []int {
-	resp, err := session.GetCategory(id);
+	resp, err := session.GetCategory(id)
 	if err != nil {
-		log.Println("err", err);
-		return []int{};
+		log.Println("err", err)
+		return []int{}
 	}
-	res := make([]int, 0);
+	res := make([]int, 0)
 	for _, x := range resp.Response.Category.Items {
-		res = append(res, x.PostId);
+		res = append(res, x.PostId)
 	}
-	return res;
+	return res
 }
 
 func ScrapeForumDefaults() []Problem {
-	session := InitForumSession();
-	res := make([]int, 0);
+	session := InitForumSession()
+	res := make([]int, 0)
 	channel := make(chan []int, len(forums))
 	wg := sync.WaitGroup{}
 	for _, id := range forums {
-		wg.Add(1);
+		wg.Add(1)
 		go func(w *sync.WaitGroup, ch chan []int, id int) {
-			ch <- session.scrapeForumPage(id);
-			w.Done();
+			ch <- session.scrapeForumPage(id)
+			w.Done()
 		}(&wg, channel, id)
 	}
-	wg.Wait();
-	close(channel);
+	wg.Wait()
+	close(channel)
 	for x := range channel {
 		res = append(res, x...)
 	}
-	return session.ScrapeForumList(res);
+	return session.ScrapeForumList(res)
 }

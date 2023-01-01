@@ -21,6 +21,7 @@ export default function About() {
     ["USAMO", 3409],
     ["JBMO", 3227],
     ["Balkan MO", 3225],
+    ["Sharygin", 3372],
     ["USA TST", 3411],
     ["USA TSTST", 3424],
     ["China TST", 3282],
@@ -49,7 +50,7 @@ export default function About() {
         .
       </p>
       <p className="mt-3">
-        Over <strong>13000</strong> Problems. Supported Contests:
+        Over <strong>14000</strong> Problems. Supported Contests:
       </p>
       <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 mx-0 border-blue-800 border p-1 rounded-lg">
         {supported.map((contest) => (

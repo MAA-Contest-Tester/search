@@ -13,12 +13,12 @@ func ScrapeWikiList(problemsets []string) []Problem {
 	channel := make(chan []Problem, len(problemsets))
 	for _, url := range problemsets {
 		w.Add(1)
-		go func (url string, ch chan []Problem, wg *sync.WaitGroup) {
+		go func(url string, ch chan []Problem, wg *sync.WaitGroup) {
 			logger.Println("Scraping", url, "...")
 			ch <- ScrapeAops(url)
 			wg.Done()
 			logger.Println("Done Scraping", url)
-		}(url, channel, &w);
+		}(url, channel, &w)
 	}
 	w.Wait()
 	close(channel)
@@ -30,25 +30,25 @@ func ScrapeWikiList(problemsets []string) []Problem {
 }
 
 func (session *ForumSession) ScrapeForumList(categories []int) []Problem {
-	w := sync.WaitGroup{};
-	channel := make(chan []Problem, len(categories));
+	w := sync.WaitGroup{}
+	channel := make(chan []Problem, len(categories))
 	for _, id := range categories {
-		w.Add(1);
+		w.Add(1)
 		go func(w *sync.WaitGroup, channel chan []Problem, id int) {
-			resp, err := session.GetCategory(id);
+			resp, err := session.GetCategory(id)
 			if err != nil {
-				logger.Println("Error", err);
+				logger.Println("Error", err)
 			} else {
 				channel <- resp.ToProblems()
 			}
-			w.Done();
+			w.Done()
 		}(&w, channel, id)
 	}
-	w.Wait();
-	res := make([]Problem, 0);
+	w.Wait()
+	res := make([]Problem, 0)
 	close(channel)
 	for c := range channel {
-		res = append(res, c...);
+		res = append(res, c...)
 	}
-	return res;
+	return res
 }

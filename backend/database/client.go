@@ -59,7 +59,7 @@ func (c *SearchClient) AddProblems(problems []scrape.Problem) {
 		AddField(redisearch.NewTextField("categories"))
 
 	if err := c.client.CreateIndex(schema); err != nil {
-		logger.Println(err);
+		logger.Println(err)
 	}
 
 	docs := make([]redisearch.Document, 0)
