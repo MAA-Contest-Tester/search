@@ -57,7 +57,7 @@ export default function Prompt() {
   }, [statement]);
 
   return (
-    <div className="rounded-lg prose px-2">
+    <div className="rounded-lg prose px-0">
       <h1 className="text-2xl font-bold">{source}</h1>
       <div
         ref={ref}

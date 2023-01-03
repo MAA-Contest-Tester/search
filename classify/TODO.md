@@ -7,7 +7,7 @@
 ## App
 
 - [x] Write an API for generating prompts and taking prompts in.
-- [ ] Implement API logic on the frontend (with reverse proxy).
+- [x] Implement API logic on the frontend (with reverse proxy).
 
 ## Classify
 

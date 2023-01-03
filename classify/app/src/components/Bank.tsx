@@ -10,7 +10,7 @@ export default function Bank() {
         onClick={() => {
           setCount(count + 1);
         }}
-        className={"p-2 text-white my-3 bg-blue-700 mx-2"}
+        className={"p-2 text-white my-3 bg-blue-700 mx-0"}
       >
         Next
       </button>

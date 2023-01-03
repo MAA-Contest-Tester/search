@@ -15,8 +15,7 @@ const (
 	pointsInTraining = 400
 )
 
-// creates a generator dataset.
-func fullDataset() [][]string {
+func fullQueries() [][]string {
 	problems := scrape.ScrapeForumDefaults()
 	data := [][]string{{"source", "statement"}}
 	for _, p := range problems {
@@ -52,8 +51,8 @@ func shuffleArray(ar [][]string) [][]string {
 	return ar
 }
 
-func PickDataset(output string) {
-	records := fullDataset()
+func getQueries(output string) {
+	records := fullQueries()
 	data := [][]string{{"source", "statement"}}
 	perm := rand.Perm(len(records) - 1)
 	for i := 0; i < pointsInTraining && i < len(perm); i++ {

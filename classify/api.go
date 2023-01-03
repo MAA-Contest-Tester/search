@@ -24,25 +24,34 @@ type ProblemsStore struct {
 	DB       *gorm.DB
 }
 
-func (d *ProblemsStore) LoadDataset(csvpath string) *ProblemsStore {
+func (d *ProblemsStore) LoadQueries(csvpath string) *ProblemsStore {
 	if d.DB == nil {
 		log.Fatal("Database is nil.")
 	}
-	r, err := os.Open(csvpath)
-	if err != nil {
-		log.Fatal(err)
+	if len(csvpath) != 0 {
+		r, err := os.Open(csvpath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		records, err := csv.NewReader(r).ReadAll()
+		if err != nil {
+			log.Fatal(err)
+		}
+		for i := 1; i < len(records); i++ {
+			p := StoreProblem{Statement: records[i][1], Source:records[i][0]};
+			d.Problems = append(d.Problems, p);
+		}
+		log.Println("Adding Points into database...");
+		d.DB.CreateInBatches(&d.Problems, 100);
+		log.Println("Done");
+	} else {
+		log.Println("Loading Points from database...");
+		var present []StoreProblem;
+		d.DB.Find(&present);
+		for _, point := range present {
+			d.Problems = append(d.Problems, StoreProblem{Statement: point.Statement, Source: point.Source});
+		}
 	}
-	records, err := csv.NewReader(r).ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for i := 1; i < len(records); i++ {
-		p := StoreProblem{Statement: records[i][1], Source:records[i][0]};
-		d.Problems = append(d.Problems, p);
-	}
-	log.Println("Adding Points into database...");
-	d.DB.CreateInBatches(&d.Problems, 100);
-	log.Println("Done");
 	return d
 }
 
@@ -67,7 +76,7 @@ type addQuery struct {
 }
 
 func CreateMux(dataset string, sqlitepath string, static string) *http.ServeMux {
-	store := (&ProblemsStore{}).InitDB(sqlitepath).LoadDataset(dataset);
+	store := (&ProblemsStore{}).InitDB(sqlitepath).LoadQueries(dataset);
 	mux := http.NewServeMux()
 	if len(static) != 0 {
 		mux.Handle("/", http.FileServer(http.Dir(static)))
