@@ -1,5 +1,5 @@
 {
-  "name": "workspace-frontend",
+  "name": "workspace-classify",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,10 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "debounce": "^1.2.1",
-    "katex": "^0.16.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "workspace-frontend": "0.0.0"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
