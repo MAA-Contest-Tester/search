@@ -6,7 +6,34 @@ import {
   renderconfig,
 } from "workspace-frontend/src/katex_constants";
 
-export default function Prompt() {
+function StreakComp(props: { streak: number }) {
+  const streak = props.streak;
+  if (streak >= 20) {
+    return (
+      <h1 className="text-xl font-extrabold text-orange-700">
+        Hottt!!! {streak} in a row!
+      </h1>
+    );
+  }
+  if (streak >= 10) {
+    return (
+      <h1 className="text-xl font-extrabold text-green-800">
+        Nice! {streak} in a row!
+      </h1>
+    );
+  }
+  if (streak >= 3) {
+    return (
+      <h1 className="text-xl font-extrabold text-blue-800">
+        Keep Going! {streak} in a row!
+      </h1>
+    );
+  } else {
+    return null;
+  }
+}
+
+export default function Prompt(props: { streak: number }) {
   const [answer, setAnswer] = useState<number | null>(null);
   const [source, setSource] = useState<string>("");
   const [statement, setStatement] = useState<string>("");
@@ -58,7 +85,8 @@ export default function Prompt() {
 
   return (
     <div className="rounded-lg prose px-0">
-      <h1 className="text-2xl font-bold">{source}</h1>
+      <StreakComp streak={props.streak} />
+      <hr className="mb-2" />
       <div
         ref={ref}
         className="whitespace-pre-wrap md:max-w-3xl sm:max-w-xl max-w-lg overflow-y-hidden overflow-x-auto p-1 text-sm select-text"
@@ -88,18 +116,20 @@ export default function Prompt() {
           ))}
         </tbody>
       </table>
-      <button
-        disabled={submitted || answer === null}
-        onClick={submit}
-        className={
-          "p-2 text-white my-3" +
-          " " +
-          (submitted || answer === null ? "bg-gray-500" : "bg-blue-700")
-        }
-      >
-        Submit
-      </button>
-      {submitted ? <div className="text-green-700">Submitted!</div> : null}
+      <div className="flex flex-row flex-wrap justify-start items-center gap-2">
+        <button
+          disabled={submitted || answer === null}
+          onClick={submit}
+          className={
+            "p-2 text-white my-3" +
+            " " +
+            (submitted || answer === null ? "bg-gray-500" : "bg-blue-700")
+          }
+        >
+          Submit
+        </button>
+        {submitted ? <div className="text-green-700">Submitted!</div> : null}
+      </div>
       {error ? <div className="p-1 text-red-700">{error}</div> : null}
     </div>
   );

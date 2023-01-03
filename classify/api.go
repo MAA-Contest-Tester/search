@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -38,18 +39,18 @@ func (d *ProblemsStore) LoadQueries(csvpath string) *ProblemsStore {
 			log.Fatal(err)
 		}
 		for i := 1; i < len(records); i++ {
-			p := StoreProblem{Statement: records[i][1], Source:records[i][0]};
-			d.Problems = append(d.Problems, p);
+			p := StoreProblem{Statement: records[i][1], Source: records[i][0]}
+			d.Problems = append(d.Problems, p)
 		}
-		log.Println("Adding Points into database...");
-		d.DB.CreateInBatches(&d.Problems, 100);
-		log.Println("Done");
+		log.Println("Adding Points into database...")
+		d.DB.CreateInBatches(&d.Problems, 100)
+		log.Println("Done")
 	} else {
-		log.Println("Loading Points from database...");
-		var present []StoreProblem;
-		d.DB.Find(&present);
+		log.Println("Loading Points from database...")
+		var present []StoreProblem
+		d.DB.Find(&present)
 		for _, point := range present {
-			d.Problems = append(d.Problems, StoreProblem{Statement: point.Statement, Source: point.Source});
+			d.Problems = append(d.Problems, StoreProblem{Statement: point.Statement, Source: point.Source})
 		}
 	}
 	return d
@@ -60,13 +61,15 @@ func (d *ProblemsStore) InitDB(sqlitepath string) *ProblemsStore {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&ClassificationEntry{}, &StoreProblem{});
+	db.AutoMigrate(&ClassificationEntry{}, &StoreProblem{})
 	d.DB = db
 	return d
 }
 
 func (d *ProblemsStore) Random() StoreProblem {
-	return d.Problems[rand.Intn(len(d.Problems))]
+	rand.Seed(time.Now().Unix());
+	chosen := rand.Intn(len(d.Problems));
+	return d.Problems[chosen]
 }
 
 type addQuery struct {
@@ -76,7 +79,7 @@ type addQuery struct {
 }
 
 func CreateMux(dataset string, sqlitepath string, static string) *http.ServeMux {
-	store := (&ProblemsStore{}).InitDB(sqlitepath).LoadQueries(dataset);
+	store := (&ProblemsStore{}).InitDB(sqlitepath).LoadQueries(dataset)
 	mux := http.NewServeMux()
 	if len(static) != 0 {
 		mux.Handle("/", http.FileServer(http.Dir(static)))
@@ -122,19 +125,19 @@ func CreateMux(dataset string, sqlitepath string, static string) *http.ServeMux 
 			invalid(errors.New(fmt.Sprint("Answer must be between 0 and", numOfFields)))
 			return
 		}
-		var problem *StoreProblem;
-		store.DB.Model(&StoreProblem{ Statement: query.Statement, Source: query.Source }).First(&problem);
+		var problem *StoreProblem
+		store.DB.Where("statement = ? AND source = ?", query.Statement, query.Source).First(&problem);
 		// handle 404
 		if problem == nil {
-			w.WriteHeader(http.StatusNotFound);
-			w.Header().Add("Content-Type", "application/json");
+			w.WriteHeader(http.StatusNotFound)
+			w.Header().Add("Content-Type", "application/json")
 			b, _ := json.Marshal(map[string]string{
 				"error": "nonexistent problem",
 			})
-			w.Write(b);
+			w.Write(b)
 			return
 		}
-		store.DB.Create(&ClassificationEntry{Answer: query.Answer, Problem: *problem});
+		store.DB.Create(&ClassificationEntry{Answer: query.Answer, Problem: *problem})
 		w.Header().Add("Content-Type", "application/json")
 		b, err := json.Marshal(map[string]interface{}{
 			"inserted": query,

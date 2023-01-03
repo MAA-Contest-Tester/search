@@ -5,7 +5,7 @@ export default function Bank() {
   const [count, setCount] = useState(0);
   return (
     <>
-      <Prompt key={count} />
+      <Prompt key={count} streak={count} />
       <button
         onClick={() => {
           setCount(count + 1);
