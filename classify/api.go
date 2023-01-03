@@ -37,7 +37,7 @@ func (d *ProblemsStore) LoadDataset(csvpath string) *ProblemsStore {
 		log.Fatal(err)
 	}
 	for i := 1; i < len(records); i++ {
-		p := StoreProblem{Statement: records[i][0], Source:records[i][1]};
+		p := StoreProblem{Statement: records[i][1], Source:records[i][0]};
 		d.Problems = append(d.Problems, p);
 	}
 	log.Println("Adding Points into database...");
@@ -87,9 +87,6 @@ func CreateMux(dataset string, sqlitepath string, static string) *http.ServeMux 
 		w.Write(b)
 	})
 	mux.HandleFunc("/api/add", func(w http.ResponseWriter, r *http.Request) {
-		var body []byte
-		io.ReadFull(r.Body, body)
-		query := addQuery{}
 		invalid := func(err error) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Header().Add("Content-Type", "application/json")
@@ -105,6 +102,8 @@ func CreateMux(dataset string, sqlitepath string, static string) *http.ServeMux 
 			invalid(errors.New("Not a POST Request"))
 			return
 		}
+		body, _ := io.ReadAll(r.Body)
+		query := addQuery{}
 		err := json.Unmarshal(body, &query)
 		if err != nil {
 			invalid(err)
