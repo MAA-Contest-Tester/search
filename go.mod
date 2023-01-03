@@ -28,3 +28,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )
+
+replace github.com/MAA-Contest-Tester/search/classify => ./classify
