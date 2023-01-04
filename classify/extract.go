@@ -27,7 +27,7 @@ func ExtractDB(g *gorm.DB) [][]string {
 		if !exist {
 			entrymap[x.Problem.ID] = &DataPoint{
 				Source:    x.Problem.Source,
-				Statement: StripSource(x.Problem.Statement),
+				Statement: x.Problem.Statement,
 			}
 		}
 		entrymap[x.Problem.ID].Hits[x.Answer]++
