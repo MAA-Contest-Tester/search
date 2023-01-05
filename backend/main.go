@@ -62,7 +62,7 @@ func dump_dataset(filename *string, forum bool) {
 		}
 		fmt.Println("Encountered filename", filename)
 		os.Remove(filename)
-		out_tmp, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
+		out_tmp, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while opening %v! %v\n", filename, err)
 			os.Exit(1)

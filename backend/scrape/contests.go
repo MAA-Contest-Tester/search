@@ -25,7 +25,6 @@ var forums = []int{
 	3420,   // usajmo
 	3429,   // elmo
 	3222,   // imo
-	3227,   // jbmo
 	3411,   // usa tst
 	3424,   // usa tstst
 	3282,   // china tst
@@ -33,21 +32,12 @@ var forums = []int{
 	3226,   // apmo
 	3246,   // egmo
 	3225,   // balkan mo
-	3372,   // sharygin
-	3238,   // rmm
-	3277,   // canada mo
-	3383,   // kmo
-	603052, // kjmo
 	3284,   // china mo
-	3287,   // cgmo
-	3288,   // china second round
-	3384,   // korea final round
 
 	2746308, // chmmc
 	253928,  // cmimc
-	3417,    // hmmt,
-	2881068, // hmmt november
-	3418,    // smt,
+	3417,    // hmmt
+	3418,    // smt
 	2503467, // bmt
 	3426,    // pumac
 	233906,  // bamo

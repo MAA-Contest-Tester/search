@@ -39,7 +39,8 @@ func (session *ForumSession) ScrapeForumList(categories []int) []Problem {
 			if err != nil {
 				logger.Println("Error", err)
 			} else {
-				channel <- resp.ToProblems()
+				r := resp.ToProblems(session)
+				channel <- r
 			}
 			w.Done()
 		}(&w, channel, id)

@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -50,13 +51,14 @@ func InitForumSession() ForumSession {
 	return data
 }
 
-func (f *ForumSession) InitRequest(id int) *http.Request {
+func (f *ForumSession) InitRequest(body_input url.Values) *http.Request {
 	body := url.Values{
-		"category_id":     {strconv.Itoa(id)},
 		"aops_logged_in":  {strconv.FormatBool(f.LoggedIn)},
-		"a":               {"fetch_category_data"},
 		"aops_user_id":    {strconv.Itoa(f.UserId)},
 		"aops_session_id": {f.SessionId},
+	}
+	for k, v := range body_input {
+		body[k] = v
 	}
 	req, err := http.NewRequest(
 		http.MethodPost,
@@ -73,8 +75,70 @@ func (f *ForumSession) InitRequest(id int) *http.Request {
 }
 
 type ErrorResponse struct {
-	Code    string `json:"errorcode,omitempty"`
+	Code    string `json:"error_code,omitempty"`
 	Message string `json:"error_msg,omitempty"`
+}
+
+/*
+Parsing Topic Tags
+
+E.g. https://artofproblemsolving.com/community/c6h1598717p9937285
+
+url.Values{
+		"category_id":     {strconv.Itoa(id)},
+		"aops_logged_in":  {strconv.FormatBool(f.LoggedIn)},
+		"a":               {"fetch_category_data"},
+		"aops_user_id":    {strconv.Itoa(f.UserId)},
+		"aops_session_id": {f.SessionId},
+	}
+*/
+
+type TopicResponse struct {
+	Response struct {
+		Topic *struct {
+			Tags []struct {
+				Id int `json:"tag_id"`
+				Text string `json:"tag_text"`
+			} `json:"tags"`
+		} `json:"topic"`
+	} `json:"response"`
+}
+
+func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
+	logger.Println("Parsing Forum Topic", id, "...")
+	client := http.Client{
+		Timeout: time.Minute * 40,
+	}
+	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_topic"}, "topic_id": {strconv.Itoa(id)}}))
+	if err != nil || resp == nil || resp.StatusCode != 200 {
+		logger.Println(err)
+		return nil, err
+	}
+	respbody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+
+	x := ErrorResponse{};
+	json.Unmarshal(respbody, &x);
+
+	serialized := TopicResponse{}
+	err = json.Unmarshal(respbody, &serialized)
+	if err != nil || serialized.Response.Topic == nil {
+		serializederror := ErrorResponse{}
+		sererr := json.Unmarshal(respbody, &serializederror)
+		if sererr != nil {
+			log.Fatal(sererr)
+		}
+		if len(serializederror.Code) > 0 {
+			return nil, errors.New(serializederror.Code)
+		}
+		return nil, err
+	} else {
+		logger.Println("Finished Parsing Forum Topic", id)
+		return &serialized, nil
+	}
 }
 
 /*
@@ -99,7 +163,7 @@ type Post struct {
 
 type CategoryResponse struct {
 	Response struct {
-		Category struct {
+		Category *struct {
 			CategoryId int    `json:"category_id"`
 			Name       string `json:"category_name"`
 			Items      []Post `json:"items"`
@@ -107,9 +171,13 @@ type CategoryResponse struct {
 	} `json:"response"`
 }
 
-func (resp *CategoryResponse) ToProblems() []Problem {
+func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
+	type Topic struct {
+		Problem Problem
+		Id int
+	}
 	items := resp.Response.Category.Items
-	res := make([]Problem, 0)
+	problems := make([]Topic, 0)
 	front_label := ""
 	// make sure we're not dealing with Solutions
 	solution_re := regexp.MustCompile(`[Ss]olution`)
@@ -145,8 +213,41 @@ func (resp *CategoryResponse) ToProblems() []Problem {
 				p.PostData.PostId,
 			),
 		}
-		CategorizeForum(&problem)
-		res = append(res, problem)
+		problems = append(problems, Topic{
+			Problem: problem,
+			Id: p.PostData.TopicId,
+		})
+	}
+	channel := make(chan Problem, len(problems));
+	wg := sync.WaitGroup{};
+
+	// fetch tags per category
+	for _, x := range problems {
+		wg.Add(1);
+		go func(c chan Problem, w *sync.WaitGroup, x Topic) {
+			t, err := f.GetTopic(x.Id);
+			if err != nil || t == nil {
+				channel <- x.Problem;
+				logger.Println(err);
+				wg.Done();
+				return;
+			}
+			tags := make([]string, 0);
+			for _, tag := range t.Response.Topic.Tags {
+				tags = append(tags, tag.Text);
+			}
+			x.Problem.Categories = strings.Join(tags, " ");
+			channel <- x.Problem;
+			wg.Done();
+		}(channel, &wg, x);
+	}
+
+	wg.Wait();
+	close(channel);
+	// put all problems from the channel.
+	res := make([]Problem, 0);
+	for p := range channel {
+		res = append(res, p);
 	}
 	return res
 }
@@ -186,7 +287,7 @@ func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
 	client := http.Client{
 		Timeout: time.Minute * 20,
 	}
-	resp, err := client.Do(f.InitRequest(id))
+	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_category_data"}, "category_id": {strconv.Itoa(id)}}))
 	if err != nil {
 		logger.Println(err)
 	}
@@ -197,14 +298,14 @@ func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
 	}
 	serialized := CategoryResponse{}
 	err = json.Unmarshal(respbody, &serialized)
-	if err != nil {
+	if err != nil || serialized.Response.Category == nil {
 		serializederror := ErrorResponse{}
 		sererr := json.Unmarshal(respbody, &serializederror)
 		if sererr != nil {
 			log.Fatal(sererr)
 		}
-		if len(serializederror.Message) > 0 {
-			return nil, errors.New(serializederror.Message)
+		if len(serializederror.Code) > 0 {
+			return nil, errors.New(serializederror.Code)
 		}
 		return nil, err
 	} else {
