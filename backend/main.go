@@ -24,7 +24,7 @@ func fileExists(path string) {
 
 var client database.SearchClient = *database.Client()
 
-func load_dataset(jsonfile *string, forum bool) {
+func load_dataset(jsonfile *string, wiki bool) {
 	var dataset []scrape.Problem
 	if jsonfile != nil {
 		fileExists(*jsonfile)
@@ -40,10 +40,10 @@ func load_dataset(jsonfile *string, forum bool) {
 		}
 		log.Printf("Loading Dataset from %v", *jsonfile)
 	} else {
-		if forum {
-			dataset = scrape.ScrapeForumDefaults()
-		} else {
+		if wiki {
 			dataset = scrape.ScrapeWikiDefaults()
+		} else {
+			dataset = scrape.ScrapeForumDefaults()
 		}
 	}
 	log.Printf("Inserting %v points into Redis...", len(dataset))
@@ -51,7 +51,7 @@ func load_dataset(jsonfile *string, forum bool) {
 	log.Println("Done")
 }
 
-func dump_dataset(filename *string, forum bool) {
+func dump_dataset(filename *string, wiki bool) {
 	var out io.Writer = os.Stdout
 	if filename != nil {
 		filename := *filename
@@ -70,23 +70,23 @@ func dump_dataset(filename *string, forum bool) {
 		out = out_tmp
 	}
 	var dataset []scrape.Problem
-	if forum {
-		dataset = scrape.ScrapeForumDefaults()
-	} else {
+	if wiki {
 		dataset = scrape.ScrapeWikiDefaults()
+	} else {
+		dataset = scrape.ScrapeForumDefaults()
 	}
 	b, _ := json.MarshalIndent(dataset, "", "  ")
 	out.Write(b)
 }
 
-func start_server(dir *string, port int, load []string, forum bool) {
+func start_server(dir *string, port int, load []string, wiki bool) {
 	if dir != nil {
 		fileExists(*dir)
 	}
 	if len(load) > 0 {
 		client.Drop()
 		for _, l := range load {
-			load_dataset(&l, forum)
+			load_dataset(&l, wiki)
 		}
 	}
 	mux := server.InitServer(dir)
@@ -96,32 +96,32 @@ func start_server(dir *string, port int, load []string, forum bool) {
 
 func main() {
 	dump := &cobra.Command{Use: "dump [file]", Args: cobra.MaximumNArgs(1), Aliases: []string{"d"}, Run: func(cmd *cobra.Command, args []string) {
-		forum, err := cmd.InheritedFlags().GetBool("forum")
+		wiki, err := cmd.InheritedFlags().GetBool("wiki")
 		if err != nil {
 			panic(err)
 		}
 		if len(args) == 1 {
-			dump_dataset(&args[0], forum)
+			dump_dataset(&args[0], wiki)
 		} else {
-			dump_dataset(nil, forum)
+			dump_dataset(nil, wiki)
 		}
 	}}
 	load := &cobra.Command{Use: "load [files...]", Aliases: []string{"l"}, Run: func(cmd *cobra.Command, args []string) {
-		forum, err := cmd.InheritedFlags().GetBool("forum")
+		wiki, err := cmd.InheritedFlags().GetBool("wiki")
 		if err != nil {
 			panic(err)
 		}
 		if len(args) >= 1 {
 			client.Drop()
 			for _, a := range args {
-				load_dataset(&a, forum)
+				load_dataset(&a, wiki)
 			}
 		} else {
-			load_dataset(nil, forum)
+			load_dataset(nil, wiki)
 		}
 	}}
 	server := &cobra.Command{Use: "server", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {
-		forum, err := cmd.InheritedFlags().GetBool("forum")
+		wiki, err := cmd.InheritedFlags().GetBool("wiki")
 		if err != nil {
 			panic(err)
 		}
@@ -129,9 +129,9 @@ func main() {
 		load, _ := cmd.Flags().GetStringArray("load")
 		dir, _ := cmd.Flags().GetString("dir")
 		if len(dir) > 0 {
-			start_server(&dir, port, load, forum)
+			start_server(&dir, port, load, wiki)
 		} else {
-			start_server(nil, port, load, forum)
+			start_server(nil, port, load, wiki)
 		}
 	}}
 	server.Flags().IntP("port", "P", 7827, "Port to use")
@@ -139,7 +139,7 @@ func main() {
 	server.Flags().StringP("dir", "D", "", "Generated directory to store")
 
 	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"}
-	root.PersistentFlags().BoolP("forum", "F", false, "Switch for dumping the AoPS forum dataset")
+	root.PersistentFlags().BoolP("wiki", "W", false, "Switch for dumping the AoPS wiki dataset")
 	root.AddCommand(dump, load, server)
 	root.Execute()
 }

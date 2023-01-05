@@ -83,14 +83,6 @@ type ErrorResponse struct {
 Parsing Topic Tags
 
 E.g. https://artofproblemsolving.com/community/c6h1598717p9937285
-
-url.Values{
-		"category_id":     {strconv.Itoa(id)},
-		"aops_logged_in":  {strconv.FormatBool(f.LoggedIn)},
-		"a":               {"fetch_category_data"},
-		"aops_user_id":    {strconv.Itoa(f.UserId)},
-		"aops_session_id": {f.SessionId},
-	}
 */
 
 type TopicResponse struct {

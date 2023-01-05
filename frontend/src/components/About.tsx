@@ -6,21 +6,35 @@ export default function About() {
     ["AMC 10", 3414],
     ["AMC 12", 3415],
     ["AIME", 3416],
+    ["MPFG", 3427],
+    ["MPFG Olympiad", 953466],
 
     ["CHMMC", 2746308],
     ["CMIMC", 253928],
     ["HMMT", 3417],
+    ["Nov HMMT", 2881068],
     ["SMT", 3418],
     ["BMT", 2503467],
     ["PUMAC", 3426],
     ["BAMO", 233906],
     ["USAMTS", 3412],
 
+    ["RMM", 3238],
+    ["Canada MO", 3277],
+    ["Korea MO", 3383],
+    ["KJMO", 603052],
     ["China MO", 3284],
+    ["China GMO", 3287],
+    ["China Round 2", 3288],
+    ["Korea TST", 3384],
+    ["Baltic Way", 3231],
+    ["All-Russian Olympiad", 3371],
 
     ["USAJMO", 3420],
     ["USAMO", 3409],
+    ["JBMO", 3227],
     ["Balkan MO", 3225],
+    ["Sharygin", 3372],
     ["USA TST", 3411],
     ["USA TSTST", 3424],
     ["China TST", 3282],
@@ -49,13 +63,14 @@ export default function About() {
         .
       </p>
       <p className="mt-3">
-        Over <strong>15000</strong> Problems. Supported Contests:
+        Over <strong>17000</strong> Problems. Supported Contests:
       </p>
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 mx-0 border-gray-200 border p-1 rounded-lg">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mx-0 border-gray-200 border p-1 rounded-lg">
         {supported.map((contest, i) => (
           <a
             className="p-[1px] font-bold"
             href={`https://artofproblemsolving.com/community/c${contest[1]}`}
+            target="_blank"
             key={i}
           >
             {contest[0]}

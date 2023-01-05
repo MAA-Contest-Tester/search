@@ -59,15 +59,19 @@ export default function Search() {
       <p className="my-3 mx-0 text-xs sm:text-sm max-w-fit">
         Type the text you want to search for (e.g. {queryExample("complex")} or{" "}
         {queryExample("polynomial")}), or you can use redisearch's querying
-        capabilities. For example, to just search for AIME introductory
-        problems, you might do{" "}
-        {queryExample("@source:(AIME) @categories:(easy)")}. To search for AMC
-        10 Problems with "mean", search {queryExample("@source:(AMC 10) mean")}.
-        Or for Olympiad Geometry Problems with cyclics in their statement,
-        search {queryExample("@source:(*MO) @statement:(cyclic)")}. Wildcard
-        searching is also allowed, such as {queryExample("*count*")}. You can
-        also mix and match all of the above, such as{" "}
-        {queryExample("@source:(*MO) @statement:(equi*) *gle")}
+        capabilities. For example, to just search for USAMO geometry problems,
+        type
+        {queryExample("@source:(USAMO) @categories:(geometry)")}. To search for
+        AMC 10 Problems with "mean", search{" "}
+        {queryExample("@source:(AMC 10) mean")}. Or for Olympiad Algebra
+        Problems about inequalities, search{" "}
+        {queryExample("@source:(*MO) @categories:(algebra inequality)")}.
+        Wildcard searching is also allowed, such as {queryExample("*count*")}.
+        You can also mix and match all of the above, such as{" "}
+        {queryExample(
+          "@source:(AIME) @statement:(complex) @categories:(number theory)"
+        )}
+        , which searches for AIME number theory problems about complex numbers.
       </p>
       <div className="border-gray-200 rounded-lg p-3 my-2 border">
         <h2 className="font-extrabold text-xl">Query Helper</h2>
@@ -99,7 +103,7 @@ export default function Search() {
           <span className="inline mr-3 col-span-1">Categories</span>
           <input
             type="text"
-            placeholder="Categories or Level (e.g. Geometry, Intermediate, Olympiad...)"
+            placeholder="Categories (e.g. Geometry, Complex, Functional...)"
             onChange={(e) => {
               e.preventDefault();
               setCategories(e.target.value);
