@@ -56,74 +56,81 @@ export default function Search() {
   );
   return (
     <>
-      <p className="my-3 mx-0 text-xs sm:text-sm max-w-fit">
-        Type the text you want to search for (e.g. {queryExample("complex")} or{" "}
-        {queryExample("polynomial")}), or you can use redisearch's querying
-        capabilities. For example, to just search for USAMO geometry problems,
-        type
-        {queryExample("@source:(USAMO) @categories:(geometry)")}. To search for
-        AMC 10 Problems with "mean", search{" "}
-        {queryExample("@source:(AMC 10) mean")}. Or for Olympiad Algebra
-        Problems about inequalities, search{" "}
-        {queryExample("@source:(*MO) @categories:(algebra inequality)")}.
-        Wildcard searching is also allowed, such as {queryExample("*count*")}.
-        You can also mix and match all of the above, such as{" "}
-        {queryExample(
-          "@source:(AIME) @statement:(complex) @categories:(number theory)"
-        )}
-        , which searches for AIME number theory problems about complex numbers.
-      </p>
-      <div className="border-gray-200 rounded-lg p-3 my-2 border">
-        <h2 className="font-extrabold text-xl">Query Helper</h2>
-        <label className="grid grid-cols-3 md:grid-cols-4 items-center">
-          <span className="inline mr-3 col-span-1">Problem Source</span>
-          <input
-            type="text"
-            placeholder="Source (e.g. Contest Name, Year, Problem Number)"
-            onChange={(e) => {
-              e.preventDefault();
-              setSource(e.target.value);
-            }}
-            className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
-          />
-        </label>
-        <label className="grid grid-cols-3 md:grid-cols-4 items-center">
-          <span className="inline mr-3 col-span-1">Problem Statement</span>
-          <input
-            type="text"
-            placeholder="Text that matches your problem"
-            onChange={(e) => {
-              e.preventDefault();
-              setStatement(e.target.value);
-            }}
-            className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
-          />
-        </label>
-        <label className="grid grid-cols-3 md:grid-cols-4 items-center">
-          <span className="inline mr-3 col-span-1">Categories</span>
-          <input
-            type="text"
-            placeholder="Categories (e.g. Geometry, Complex, Functional...)"
-            onChange={(e) => {
-              e.preventDefault();
-              setCategories(e.target.value);
-            }}
-            className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
-          />
-        </label>
+      <div className="print:hidden">
+        <p className="my-3 mx-0 text-xs sm:text-sm max-w-fit">
+          Type the text you want to search for (e.g. {queryExample("complex")}{" "}
+          or {queryExample("polynomial")}), or you can use redisearch's querying
+          capabilities. For example, to just search for USAMO geometry problems,
+          type
+          {queryExample("@source:(USAMO) @categories:(geometry)")}. To search
+          for AMC 10 Problems with "mean", search{" "}
+          {queryExample("@source:(AMC 10) mean")}. Or for Olympiad Algebra
+          Problems about inequalities, search{" "}
+          {queryExample("@source:(*MO) @categories:(algebra inequality)")}.
+          Wildcard searching is also allowed, such as {queryExample("*count*")}.
+          You can also mix and match all of the above, such as{" "}
+          {queryExample(
+            "@source:(AIME) @statement:(complex) @categories:(number theory)"
+          )}
+          , which searches for AIME number theory problems about complex
+          numbers.
+        </p>
+        <div className="border-gray-200 rounded-lg p-3 my-2 border">
+          <h2 className="font-extrabold text-xl">Query Helper</h2>
+          <label className="grid grid-cols-3 md:grid-cols-4 items-center">
+            <span className="inline mr-3 col-span-1">Problem Source</span>
+            <input
+              type="text"
+              placeholder="Source (e.g. Contest Name, Year, Problem Number)"
+              onChange={(e) => {
+                e.preventDefault();
+                setSource(e.target.value);
+              }}
+              className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
+            />
+          </label>
+          <label className="grid grid-cols-3 md:grid-cols-4 items-center">
+            <span className="inline mr-3 col-span-1">Problem Statement</span>
+            <input
+              type="text"
+              placeholder="Text that matches your problem"
+              onChange={(e) => {
+                e.preventDefault();
+                setStatement(e.target.value);
+              }}
+              className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
+            />
+          </label>
+          <label className="grid grid-cols-3 md:grid-cols-4 items-center">
+            <span className="inline mr-3 col-span-1">Categories</span>
+            <input
+              type="text"
+              placeholder="Categories (e.g. Geometry, Complex, Functional...)"
+              onChange={(e) => {
+                e.preventDefault();
+                setCategories(e.target.value);
+              }}
+              className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
+            />
+          </label>
+        </div>
+        <input
+          type="text"
+          value={query}
+          placeholder="Raw Query"
+          onChange={(e) => {
+            e.preventDefault();
+            setQuery(e.target.value);
+          }}
+          className="w-full rounded-md my-1"
+        />
+        {error ? <p className="text-red-600 my-2">{error}</p> : null}
       </div>
-      <input
-        type="text"
-        value={query}
-        placeholder="Raw Query"
-        onChange={(e) => {
-          e.preventDefault();
-          setQuery(e.target.value);
-        }}
-        className="w-full rounded-md my-1"
-      />
-      {error ? <p className="text-red-600 my-2">{error}</p> : null}
-      <div className="w-full">
+      <div className="w-full break-inside-avoid-page">
+        <div className="print:visible invisible text-sm">
+          <strong>Generated by Search.MAATester.com</strong> <br />
+          {query}
+        </div>
         {results.length
           ? results.map((el, i) => <Result key={i} {...el} />)
           : null}

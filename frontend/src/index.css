@@ -14,6 +14,12 @@ a {
   width: clamp(10%, 700px, 100%);
 }
 
+@media print {
+  .clamp {
+    width: 100%;
+  }
+}
+
 html {
   overflow-y: scroll;
 }

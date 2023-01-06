@@ -1,7 +1,7 @@
 import "katex/dist/katex.min.css";
 import renderMathInElement from "katex/dist/contrib/auto-render";
 import "./Result.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const delimiters = [
   { left: "$$", right: "$$", display: true },
@@ -68,12 +68,18 @@ export default function Result(props: {
     }
   });
   const preprocessed = preprocess(props.statement);
+  const [visible, setVisible] = useState(true);
   return (
-    <div className="my-5 p-3 border-gray-200 border rounded-lg w-full">
+    <div
+      className={
+        "my-5 p-3 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-afterpage" +
+        (!visible ? " print:hidden" : "")
+      }
+    >
       <a href={props.url} target="_blank" className="mx-3 font-bold text-base">
         {props.source?.replace(new RegExp("Problems Problem"), "Problem")}
       </a>
-      <div className="flex flex-wrap flex-row justify-between items-center">
+      <div className="flex flex-wrap flex-row justify-between items-center print:hidden">
         <a
           href={props.solution}
           target="_blank"
@@ -81,16 +87,27 @@ export default function Result(props: {
         >
           See Solution
         </a>
-        <button
-          onClick={(_) => navigator.clipboard.writeText(preprocessed)}
-          className="mx-3 font-bold text-base hover:bg-blue-800 hover:text-white p-[2px] border-gray-200 rounded-lg border duration-200"
-        >
-          Copy
-        </button>
+        <div className="flex flex-wrap flex-row justify-left items-center print:hidden">
+          <button
+            onClick={(_) => navigator.clipboard.writeText(preprocessed)}
+            className="mx-3 font-bold text-base hover:bg-blue-800 hover:text-white p-[2px] border-gray-200 rounded-lg border duration-200"
+          >
+            Copy
+          </button>
+          <div className="items-center flex">
+            <span className="mx-1 text-sm">Print</span>
+            <input
+              type="checkbox"
+              alt="Include when printing?"
+              checked={visible}
+              onChange={() => setVisible(!visible)}
+            />
+          </div>
+        </div>
       </div>
       <div
         ref={ref}
-        className="whitespace-pre-wrap md:max-w-3xl sm:max-w-xl max-w-lg overflow-y-hidden overflow-x-auto p-1 text-sm select-text"
+        className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text"
       >
         {preprocessed}
       </div>

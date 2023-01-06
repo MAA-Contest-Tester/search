@@ -72,7 +72,7 @@ export default function About() {
   ];
   const [open, setOpen] = useState(false);
   return (
-    <div className="my-3 mx-0 text-sm">
+    <div className="my-3 mx-0 text-sm print:hidden">
       <p>
         An instant search engine for math olympiad questions. Problems sourced
         from the AoPS Community.
@@ -90,7 +90,8 @@ export default function About() {
         .
       </p>
       <p className="mt-3">
-        Over <strong>17000</strong> Problems.
+        Over <strong>17000</strong> Problems. <strong>Printer-friendly</strong>,
+        instantly generate handouts.
       </p>
       <div className="mx-0 border-gray-200 border p-1 rounded-lg transition-all transform duration-1000">
         <button
