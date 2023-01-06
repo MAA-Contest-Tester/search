@@ -17,7 +17,20 @@ export default function Search() {
           setError(await data.text());
         } else {
           setError(null);
-          data.json().then((json) => setResults(json));
+          data.json().then((json: any[]) => {
+            json.sort((a, b) => {
+              const x = (a.source as string).toLowerCase();
+              const y = (b.source as string).toLowerCase();
+              if (x > y) {
+                return 1;
+              } else if (x < y) {
+                return -1;
+              } else {
+                return 0;
+              }
+            });
+            setResults(json);
+          });
         }
       })
       .catch((_) => {
