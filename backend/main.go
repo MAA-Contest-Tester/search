@@ -67,17 +67,18 @@ func dumpDataset(filename *string, contests string) {
 	if len(contests) == 0 {
 		dataset = scrape.ScrapeForumDefaults()
 	} else {
-		var categories []int;
-		fileExists(contests);
-		b, err := os.ReadFile(contests); if err != nil {
-			log.Fatal(err);
-			os.Exit(1);
+		var categories []int
+		fileExists(contests)
+		b, err := os.ReadFile(contests)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
 		}
 		if json.Unmarshal(b, &categories) != nil {
-			log.Fatal(err);
-			os.Exit(1);
+			log.Fatal(err)
+			os.Exit(1)
 		}
-		dataset = scrape.ScrapeForumCategories(categories);
+		dataset = scrape.ScrapeForumCategories(categories)
 	}
 	b, _ := json.MarshalIndent(dataset, "", "  ")
 	out.Write(b)
@@ -100,7 +101,7 @@ func startServer(dir *string, port int, load []string) {
 
 func main() {
 	dump := &cobra.Command{Use: "dump [file]", Args: cobra.MaximumNArgs(1), Aliases: []string{"d"}, Run: func(cmd *cobra.Command, args []string) {
-		contests, _ := cmd.Flags().GetString("contests");
+		contests, _ := cmd.Flags().GetString("contests")
 		if len(args) == 1 {
 			dumpDataset(&args[0], contests)
 		} else {

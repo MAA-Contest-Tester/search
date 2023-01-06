@@ -105,9 +105,9 @@ export default function About() {
           <span className="mx-2">{open ? "-" : "+"}</span>
         </button>
         {open
-          ? supported.map((category) => (
+          ? supported.map((category, i) => (
               <>
-                <h1 className="text-lg font-bold text-center mt-2">
+                <h1 className="text-lg font-bold text-center mt-2" key={i}>
                   {category[0]}
                 </h1>
                 <hr />

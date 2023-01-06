@@ -255,17 +255,20 @@ func reduceWidth(attr string) string {
 }
 
 func parseProblemRenderedHTML(text string) (string, error) {
-	nd, err := html.Parse(strings.NewReader(text))
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(text))
 	if err != nil {
 		return "", err
 	}
-	// replace with dollar signs
-	for child := nd.FirstChild; child != nil; child = child.NextSibling {
-		if child.Type == html.TextNode {
-			child.Data = strings.ReplaceAll(child.Data, "$", `$\textdollar$`)
+	for _, node := range doc.Nodes {
+		// each node is structured as <html><head></head><body>{our text}</body></html>
+		// so we have to structure it as below.
+		node = node.FirstChild.FirstChild.NextSibling
+		for child := node.FirstChild; child != nil; child = child.NextSibling {
+			if child.Type == html.TextNode {
+				child.Data = strings.ReplaceAll(child.Data, "$", `$\textdollar$`)
+			}
 		}
 	}
-	doc := goquery.NewDocumentFromNode(nd)
 	doc.Find("img[alt].latex, img[alt].latexcenter").Each(func(i int, s *goquery.Selection) {
 		s.SetText(s.AttrOr("alt", ""))
 	})

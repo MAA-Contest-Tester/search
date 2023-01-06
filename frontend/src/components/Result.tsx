@@ -40,12 +40,14 @@ const preprocess = (s: string | undefined) => {
   // eqnarray and tabular modified
   const res = s
     .trim()
-    .replace(new RegExp(/\\begin{eqnarray\*}/, "g"), "\\begin{align*}")
-    .replace(new RegExp(/\\end{eqnarray\*}/, "g"), "\\end{align*}")
-    .replace(new RegExp(/\\begin{tabular}(\[.*?\])?/, "g"), "\\begin{array}")
-    .replace(new RegExp(/\\end{tabular}(\[.*?\])?/, "g"), "\\end{array}")
+    .replace(new RegExp(/\\begin\{eqnarray\*}/, "g"), "\\begin{align*}")
+    .replace(new RegExp(/\\end\{eqnarray\*}/, "g"), "\\end{align*}")
+    .replace(new RegExp(/\\begin\{tabular}(\[.*?\])?/, "g"), "\\begin{array}")
+    .replace(new RegExp(/\\end\{tabular}(\[.*?\])?/, "g"), "\\end{array}")
     .replace(new RegExp(/\\makebox(\[.*?\])?/, "g"), "\\begin{array}")
-    .replace(new RegExp(/\\mbox/, "g"), "\\text");
+    .replace(new RegExp(/\\mbox/, "g"), "\\text")
+    .replace(new RegExp(/\\bigg\s*\{\\\}\}/, "g"), "\\bigg \\}")
+    .replace(new RegExp(/\\bigg\s*\{\\\{\}/, "g"), "\\bigg \\{");
   return res;
 };
 
