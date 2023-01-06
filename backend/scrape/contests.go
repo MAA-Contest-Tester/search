@@ -2,29 +2,15 @@ package scrape
 
 import (
 	"log"
-	"regexp"
 	"sync"
-
-	"github.com/gocolly/colly"
 )
 
-var wikicontests = []struct {
-	Url    string
-	Search *regexp.Regexp
-}{
-	{Url: "AIME_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_AIME(_I{1,2})?$`)},
-	{Url: "AMC_10_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}(_[A-Z,a-z]*?)?_AMC_10[AB]?$`)},
-	{Url: "AMC_12_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}(_[A-Z,a-z]*?)?_AMC_12[AB]?$`)},
-	{Url: "AHSME_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_AHSME$`)},
-	{Url: "AMC_8_Problems_and_Solutions", Search: regexp.MustCompile(`/index.php/\d{4}_(AMC_8|AJHSME)$`)},
-}
-
 var forums = []int{
-	3416, //aime
-	3414, //amc 10
-	3415, // amc 12
-	3413, // amc 8
-	3427, // mpfg
+	3416,   //aime
+	3414,   //amc 10
+	3415,   // amc 12
+	3413,   // amc 8
+	3427,   // mpfg
 	953466, // mpfg olympiad
 
 	3412,   // usamts
@@ -51,8 +37,8 @@ var forums = []int{
 	3384,   // korea final round
 
 	915845, //balkan mo shortlist
-	3231, //baltic way
-	3371, //all-russian olympiad
+	3231,   //baltic way
+	3371,   //all-russian olympiad
 
 	2746308, // chmmc
 	253928,  // cmimc
@@ -62,52 +48,6 @@ var forums = []int{
 	2503467, // bmt
 	3426,    // pumac
 	233906,  // bamo
-}
-
-var redlink = regexp.MustCompile(`redlink=1`)
-
-func scrapeWikiPage(url string, re *regexp.Regexp, w *sync.WaitGroup, channel chan []string) {
-	url = "https://artofproblemsolving.com/wiki/index.php/" + url
-	logger.Println("Parsing", url, "For Problemsets...")
-	c := colly.NewCollector()
-
-	res := make([]string, 0)
-
-	c.OnHTML("div.mw-parser-output a[href]", func(el *colly.HTMLElement) {
-		// fill out res.
-		href := el.Attr("href")
-		if redlink.Match([]byte(href)) {
-			return
-		}
-		match := re.Match([]byte(href))
-		if match {
-			res = append(res, el.Request.AbsoluteURL(href)+"_Problems")
-		}
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		logger.Println("Request URL:", r.Request.URL, "failed with response:", r.StatusCode, ", Error:", err)
-	})
-	c.Visit(url)
-	c.Wait()
-	channel <- res
-	w.Done()
-	logger.Println("Finished Parsing", url)
-}
-
-func ScrapeWikiDefaults() []Problem {
-	res := make([]string, 0)
-	channel := make(chan []string, len(wikicontests))
-	wg := sync.WaitGroup{}
-	for _, contest := range wikicontests {
-		wg.Add(1)
-		go scrapeWikiPage(contest.Url, contest.Search, &wg, channel)
-	}
-	wg.Wait()
-	close(channel)
-	for x := range channel {
-		res = append(res, x...)
-	}
-	return ScrapeWikiList(res)
 }
 
 func (session *ForumSession) scrapeForumPage(id int) []int {
@@ -124,11 +64,15 @@ func (session *ForumSession) scrapeForumPage(id int) []int {
 }
 
 func ScrapeForumDefaults() []Problem {
+	return ScrapeForumCategories(forums)
+}
+
+func ScrapeForumCategories(categories []int) []Problem {
 	session := InitForumSession()
 	res := make([]int, 0)
 	channel := make(chan []int, len(forums))
 	wg := sync.WaitGroup{}
-	for _, id := range forums {
+	for _, id := range categories {
 		wg.Add(1)
 		go func(w *sync.WaitGroup, ch chan []int, id int) {
 			ch <- session.scrapeForumPage(id)

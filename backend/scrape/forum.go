@@ -89,7 +89,7 @@ type TopicResponse struct {
 	Response struct {
 		Topic *struct {
 			Tags []struct {
-				Id int `json:"tag_id"`
+				Id   int    `json:"tag_id"`
 				Text string `json:"tag_text"`
 			} `json:"tags"`
 		} `json:"topic"`
@@ -112,8 +112,8 @@ func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
 		return nil, err
 	}
 
-	x := ErrorResponse{};
-	json.Unmarshal(respbody, &x);
+	x := ErrorResponse{}
+	json.Unmarshal(respbody, &x)
 
 	serialized := TopicResponse{}
 	err = json.Unmarshal(respbody, &serialized)
@@ -166,7 +166,7 @@ type CategoryResponse struct {
 func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 	type Topic struct {
 		Problem Problem
-		Id int
+		Id      int
 	}
 	items := resp.Response.Category.Items
 	problems := make([]Topic, 0)
@@ -207,41 +207,51 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 		}
 		problems = append(problems, Topic{
 			Problem: problem,
-			Id: p.PostData.TopicId,
+			Id:      p.PostData.TopicId,
 		})
 	}
-	channel := make(chan Problem, len(problems));
-	wg := sync.WaitGroup{};
+	channel := make(chan Problem, len(problems))
+	wg := sync.WaitGroup{}
 
 	// fetch tags per category
 	for _, x := range problems {
-		wg.Add(1);
+		wg.Add(1)
 		go func(c chan Problem, w *sync.WaitGroup, x Topic) {
-			t, err := f.GetTopic(x.Id);
+			t, err := f.GetTopic(x.Id)
 			if err != nil || t == nil {
-				channel <- x.Problem;
-				logger.Println(err);
-				wg.Done();
-				return;
+				channel <- x.Problem
+				logger.Println(err)
+				wg.Done()
+				return
 			}
-			tags := make([]string, 0);
+			tags := make([]string, 0)
 			for _, tag := range t.Response.Topic.Tags {
-				tags = append(tags, tag.Text);
+				tags = append(tags, tag.Text)
 			}
-			x.Problem.Categories = strings.Join(tags, " ");
-			channel <- x.Problem;
-			wg.Done();
-		}(channel, &wg, x);
+			x.Problem.Categories = strings.Join(tags, " ")
+			channel <- x.Problem
+			wg.Done()
+		}(channel, &wg, x)
 	}
 
-	wg.Wait();
-	close(channel);
+	wg.Wait()
+	close(channel)
 	// put all problems from the channel.
-	res := make([]Problem, 0);
+	res := make([]Problem, 0)
 	for p := range channel {
-		res = append(res, p);
+		res = append(res, p)
 	}
 	return res
+}
+
+// helper function to half the width.
+func reduceWidth(attr string) string {
+	value, err := strconv.Atoi(attr)
+	if err != nil {
+		return attr
+	} else {
+		return strconv.Itoa(value / 2)
+	}
 }
 
 func parseProblemRenderedHTML(text string) (string, error) {

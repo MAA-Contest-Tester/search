@@ -24,7 +24,7 @@ func fileExists(path string) {
 
 var client database.SearchClient = *database.Client()
 
-func load_dataset(jsonfile *string, wiki bool) {
+func loadDataset(jsonfile *string) {
 	var dataset []scrape.Problem
 	if jsonfile != nil {
 		fileExists(*jsonfile)
@@ -40,18 +40,14 @@ func load_dataset(jsonfile *string, wiki bool) {
 		}
 		log.Printf("Loading Dataset from %v", *jsonfile)
 	} else {
-		if wiki {
-			dataset = scrape.ScrapeWikiDefaults()
-		} else {
-			dataset = scrape.ScrapeForumDefaults()
-		}
+		dataset = scrape.ScrapeForumDefaults()
 	}
 	log.Printf("Inserting %v points into Redis...", len(dataset))
 	client.AddProblems(dataset)
 	log.Println("Done")
 }
 
-func dump_dataset(filename *string, wiki bool) {
+func dumpDataset(filename *string, contests string) {
 	var out io.Writer = os.Stdout
 	if filename != nil {
 		filename := *filename
@@ -60,8 +56,6 @@ func dump_dataset(filename *string, wiki bool) {
 			fmt.Fprintf(os.Stderr, "Error while creating dirs for %v! %v\n", filename, err)
 			os.Exit(1)
 		}
-		fmt.Println("Encountered filename", filename)
-		os.Remove(filename)
 		out_tmp, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while opening %v! %v\n", filename, err)
@@ -70,23 +64,33 @@ func dump_dataset(filename *string, wiki bool) {
 		out = out_tmp
 	}
 	var dataset []scrape.Problem
-	if wiki {
-		dataset = scrape.ScrapeWikiDefaults()
-	} else {
+	if len(contests) == 0 {
 		dataset = scrape.ScrapeForumDefaults()
+	} else {
+		var categories []int;
+		fileExists(contests);
+		b, err := os.ReadFile(contests); if err != nil {
+			log.Fatal(err);
+			os.Exit(1);
+		}
+		if json.Unmarshal(b, &categories) != nil {
+			log.Fatal(err);
+			os.Exit(1);
+		}
+		dataset = scrape.ScrapeForumCategories(categories);
 	}
 	b, _ := json.MarshalIndent(dataset, "", "  ")
 	out.Write(b)
 }
 
-func start_server(dir *string, port int, load []string, wiki bool) {
+func startServer(dir *string, port int, load []string) {
 	if dir != nil {
 		fileExists(*dir)
 	}
 	if len(load) > 0 {
 		client.Drop()
 		for _, l := range load {
-			load_dataset(&l, wiki)
+			loadDataset(&l)
 		}
 	}
 	mux := server.InitServer(dir)
@@ -96,42 +100,32 @@ func start_server(dir *string, port int, load []string, wiki bool) {
 
 func main() {
 	dump := &cobra.Command{Use: "dump [file]", Args: cobra.MaximumNArgs(1), Aliases: []string{"d"}, Run: func(cmd *cobra.Command, args []string) {
-		wiki, err := cmd.InheritedFlags().GetBool("wiki")
-		if err != nil {
-			panic(err)
-		}
+		contests, _ := cmd.Flags().GetString("contests");
 		if len(args) == 1 {
-			dump_dataset(&args[0], wiki)
+			dumpDataset(&args[0], contests)
 		} else {
-			dump_dataset(nil, wiki)
+			dumpDataset(nil, contests)
 		}
 	}}
+	dump.Flags().StringP("contests", "C", "", "list of contests to parse (everything if this file is not specified)")
 	load := &cobra.Command{Use: "load [files...]", Aliases: []string{"l"}, Run: func(cmd *cobra.Command, args []string) {
-		wiki, err := cmd.InheritedFlags().GetBool("wiki")
-		if err != nil {
-			panic(err)
-		}
 		if len(args) >= 1 {
 			client.Drop()
 			for _, a := range args {
-				load_dataset(&a, wiki)
+				loadDataset(&a)
 			}
 		} else {
-			load_dataset(nil, wiki)
+			loadDataset(nil)
 		}
 	}}
 	server := &cobra.Command{Use: "server", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {
-		wiki, err := cmd.InheritedFlags().GetBool("wiki")
-		if err != nil {
-			panic(err)
-		}
 		port, _ := cmd.Flags().GetInt("port")
 		load, _ := cmd.Flags().GetStringArray("load")
 		dir, _ := cmd.Flags().GetString("dir")
 		if len(dir) > 0 {
-			start_server(&dir, port, load, wiki)
+			startServer(&dir, port, load)
 		} else {
-			start_server(nil, port, load, wiki)
+			startServer(nil, port, load)
 		}
 	}}
 	server.Flags().IntP("port", "P", 7827, "Port to use")
@@ -139,7 +133,6 @@ func main() {
 	server.Flags().StringP("dir", "D", "", "Generated directory to store")
 
 	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"}
-	root.PersistentFlags().BoolP("wiki", "W", false, "Switch for dumping the AoPS wiki dataset")
 	root.AddCommand(dump, load, server)
 	root.Execute()
 }

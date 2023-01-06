@@ -21,9 +21,16 @@ Run `cd ./frontend && yarn`
 2. Start the backend server. In the project root, run `go run ./backend/main.go server`.
 3. Start the frontend vite server by running `cd ./frontend && yarn dev`.
 
-## Loading AoPS Data
+## Fetch Data
 
-Run `go run ./backend/main.go load && go run ./backend/main.go load -F`; this
+Run `go run ./backend/main.go dump (output json)`. This will fetch the full
+dataset, which may or may not work.
+
+You could also do `go run ./backend/main.go dump -C contests/(preference.json) (output json)`, which will only pick a specific set of contests to fetch.
+
+## Loading
+
+Run `go run ./backend/main.go load (json file from dump)`; this
 will populate the redis database with problems scraped from AoPS.
 
 # Production
