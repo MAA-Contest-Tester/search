@@ -4,7 +4,7 @@ COPY go.mod go.sum /build/
 RUN go mod download
 COPY . /build/
 RUN make
-RUN /build/out/psearch dump -J 20 /data/forum.json
+RUN /build/out/psearch dump -J 15 /data/forum.json
 
 FROM node:alpine as frontend
 COPY --from=backend /build/frontend /build/frontend/

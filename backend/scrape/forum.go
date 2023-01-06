@@ -283,7 +283,7 @@ func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
 		Timeout: time.Minute * 20,
 	}
 	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_category_data"}, "category_id": {strconv.Itoa(id)}}))
-	if resp != nil {
+	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
 	}
 	if err != nil || resp == nil || resp.StatusCode != 200 {
