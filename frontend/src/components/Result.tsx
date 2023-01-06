@@ -72,7 +72,7 @@ export default function Result(props: {
   return (
     <div
       className={
-        "my-5 p-3 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-afterpage" +
+        "my-2 p-3 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full" +
         (!visible ? " print:hidden" : "")
       }
     >
@@ -98,6 +98,7 @@ export default function Result(props: {
             <span className="mx-1 text-sm">Print</span>
             <input
               type="checkbox"
+              className="rounded-sm"
               alt="Include when printing?"
               checked={visible}
               onChange={() => setVisible(!visible)}
