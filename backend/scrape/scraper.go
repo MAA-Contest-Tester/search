@@ -7,7 +7,6 @@ import (
 )
 
 var logger = log.New(os.Stderr, "[Scraper Info]  ", 0)
-var WorkerCount int
 
 func ScrapeWikiList(problemsets []string) []Problem {
 	w := sync.WaitGroup{}
@@ -31,31 +30,26 @@ func ScrapeWikiList(problemsets []string) []Problem {
 }
 
 func (session *ForumSession) ScrapeForumList(categories []int) []Problem {
-	logger.Println("workers", WorkerCount)
-	jobs := make(chan int, len(categories))
-	results := make(chan []Problem, len(categories))
-
-	worker := func(jobs <-chan int, results chan<- []Problem) {
-		for id := range jobs {
+	w := sync.WaitGroup{}
+	channel := make(chan []Problem, len(categories))
+	for _, id := range categories {
+		w.Add(1)
+		go func(w *sync.WaitGroup, channel chan []Problem, id int) {
 			resp, err := session.GetCategory(id)
 			if err != nil {
 				logger.Println("Error", err)
 			} else {
 				r := resp.ToProblems(session)
-				results <- r
+				channel <- r
 			}
-		}
+			w.Done()
+		}(&w, channel, id)
 	}
-	for i := 0; i < WorkerCount; i++ {
-		go worker(jobs, results)
-	}
-	for _, id := range categories {
-		jobs <- id
-	}
-	close(jobs)
+	w.Wait()
 	res := make([]Problem, 0)
-	for i := 0; i < len(categories); i++ {
-		res = append(res, (<-results)...)
+	close(channel)
+	for c := range channel {
+		res = append(res, c...)
 	}
 	return res
 }

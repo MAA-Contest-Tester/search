@@ -23,14 +23,8 @@ Run `cd ./frontend && yarn`
 
 ## Loading AoPS Data
 
-Run `go run ./backend/main.go load`; this
+Run `go run ./backend/main.go load && go run ./backend/main.go load -F`; this
 will populate the redis database with problems scraped from AoPS.
-
-### Job Count
-
-Some systems will prevent you from making a massive number of concurrent
-requests; on an iMac, this seems to be capped at around 100. the `-J` option
-allows you to restrict the number of workers; default is 10.
 
 # Production
 

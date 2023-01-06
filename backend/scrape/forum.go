@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -67,7 +68,6 @@ func (f *ForumSession) InitRequest(body_input url.Values) *http.Request {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	req.Close = true
 	req.AddCookie(&http.Cookie{Name: "aopsuid", Value: strconv.Itoa(f.UserId)})
 	req.AddCookie(&http.Cookie{Name: "aopssid", Value: f.Sid})
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
@@ -89,7 +89,7 @@ type TopicResponse struct {
 	Response struct {
 		Topic *struct {
 			Tags []struct {
-				Id   int    `json:"tag_id"`
+				Id int `json:"tag_id"`
 				Text string `json:"tag_text"`
 			} `json:"tags"`
 		} `json:"topic"`
@@ -102,9 +102,6 @@ func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
 		Timeout: time.Minute * 40,
 	}
 	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_topic"}, "topic_id": {strconv.Itoa(id)}}))
-	if resp != nil {
-		defer resp.Body.Close()
-	}
 	if err != nil || resp == nil || resp.StatusCode != 200 {
 		logger.Println(err)
 		return nil, err
@@ -115,8 +112,8 @@ func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
 		return nil, err
 	}
 
-	x := ErrorResponse{}
-	json.Unmarshal(respbody, &x)
+	x := ErrorResponse{};
+	json.Unmarshal(respbody, &x);
 
 	serialized := TopicResponse{}
 	err = json.Unmarshal(respbody, &serialized)
@@ -169,7 +166,7 @@ type CategoryResponse struct {
 func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 	type Topic struct {
 		Problem Problem
-		Id      int
+		Id int
 	}
 	items := resp.Response.Category.Items
 	problems := make([]Topic, 0)
@@ -210,39 +207,39 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 		}
 		problems = append(problems, Topic{
 			Problem: problem,
-			Id:      p.PostData.TopicId,
+			Id: p.PostData.TopicId,
 		})
 	}
-	results := make(chan Problem, len(problems))
-	jobs := make(chan Topic, len(problems))
+	channel := make(chan Problem, len(problems));
+	wg := sync.WaitGroup{};
 
-	worker := func(jobs <-chan Topic, results chan<- Problem) {
-		for x := range jobs {
-			t, err := f.GetTopic(x.Id)
-			if err != nil || t == nil || t.Response.Topic == nil {
-				results <- x.Problem
-				logger.Println(err)
-			}
-			tags := make([]string, 0)
-			for _, tag := range t.Response.Topic.Tags {
-				tags = append(tags, tag.Text)
-			}
-			x.Problem.Categories = strings.Join(tags, " ")
-			results <- x.Problem
-		}
-	}
-	for i := 0; i < WorkerCount; i++ {
-		go worker(jobs, results)
-	}
 	// fetch tags per category
 	for _, x := range problems {
-		jobs <- x
+		wg.Add(1);
+		go func(c chan Problem, w *sync.WaitGroup, x Topic) {
+			t, err := f.GetTopic(x.Id);
+			if err != nil || t == nil {
+				channel <- x.Problem;
+				logger.Println(err);
+				wg.Done();
+				return;
+			}
+			tags := make([]string, 0);
+			for _, tag := range t.Response.Topic.Tags {
+				tags = append(tags, tag.Text);
+			}
+			x.Problem.Categories = strings.Join(tags, " ");
+			channel <- x.Problem;
+			wg.Done();
+		}(channel, &wg, x);
 	}
-	close(jobs)
+
+	wg.Wait();
+	close(channel);
 	// put all problems from the channel.
-	res := make([]Problem, 0)
-	for i := 0; i < len(problems); i++ {
-		res = append(res, (<-results))
+	res := make([]Problem, 0);
+	for p := range channel {
+		res = append(res, p);
 	}
 	return res
 }
@@ -283,12 +280,8 @@ func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
 		Timeout: time.Minute * 20,
 	}
 	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_category_data"}, "category_id": {strconv.Itoa(id)}}))
-	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
-	}
-	if err != nil || resp == nil || resp.StatusCode != 200 {
+	if err != nil {
 		logger.Println(err)
-		return nil, err
 	}
 	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {

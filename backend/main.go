@@ -96,12 +96,6 @@ func start_server(dir *string, port int, load []string, wiki bool) {
 
 func main() {
 	dump := &cobra.Command{Use: "dump [file]", Args: cobra.MaximumNArgs(1), Aliases: []string{"d"}, Run: func(cmd *cobra.Command, args []string) {
-
-		workers, err := cmd.InheritedFlags().GetInt("workers")
-		if err != nil {
-			panic(err)
-		}
-		scrape.WorkerCount = workers
 		wiki, err := cmd.InheritedFlags().GetBool("wiki")
 		if err != nil {
 			panic(err)
@@ -113,11 +107,6 @@ func main() {
 		}
 	}}
 	load := &cobra.Command{Use: "load [files...]", Aliases: []string{"l"}, Run: func(cmd *cobra.Command, args []string) {
-		workers, err := cmd.InheritedFlags().GetInt("workers")
-		if err != nil {
-			panic(err)
-		}
-		scrape.WorkerCount = workers
 		wiki, err := cmd.InheritedFlags().GetBool("wiki")
 		if err != nil {
 			panic(err)
@@ -132,11 +121,6 @@ func main() {
 		}
 	}}
 	server := &cobra.Command{Use: "server", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {
-		workers, err := cmd.InheritedFlags().GetInt("workers")
-		if err != nil {
-			panic(err)
-		}
-		scrape.WorkerCount = workers
 		wiki, err := cmd.InheritedFlags().GetBool("wiki")
 		if err != nil {
 			panic(err)
@@ -156,8 +140,6 @@ func main() {
 
 	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"}
 	root.PersistentFlags().BoolP("wiki", "W", false, "Switch for dumping the AoPS wiki dataset")
-	root.PersistentFlags().IntP("workers", "J", 10, "Number of Workers to Use (goes n^2)")
-
 	root.AddCommand(dump, load, server)
 	root.Execute()
 }
