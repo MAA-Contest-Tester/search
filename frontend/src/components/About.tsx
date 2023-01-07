@@ -90,8 +90,8 @@ export default function About() {
         .
       </p>
       <p className="mt-3">
-        Over <strong>17000</strong> Problems. <strong>Printer-friendly</strong>,
-        instantly generate handouts.
+        Over <strong>17000</strong> Problems. <strong>Instant Handouts</strong>{" "}
+        with printer friendliness.
       </p>
       <div className="mx-0 border-gray-200 border p-1 rounded-lg transition-all transform duration-1000">
         <button
