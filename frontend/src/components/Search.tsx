@@ -2,6 +2,35 @@ import { useEffect, useState } from "react";
 import Result from "./Result";
 import { debounce } from "debounce";
 
+const mtch = /Problem (.*)/;
+
+function sortResults(data: { source: string }[]) {
+  data.sort((a, b) => {
+    const x = mtch.exec(a.source);
+    const y = mtch.exec(b.source);
+    const compare = (x: any, y: any) => {
+      if (x > y) {
+        return 1;
+      } else if (x < y) {
+        return -1;
+      } else {
+        return 0;
+      }
+    };
+    if (x && y) {
+      const a_prev = a.source.slice(0, x.index);
+      const b_prev = b.source.slice(0, y.index);
+      if (compare(b_prev, a_prev)) {
+        return compare(b_prev, a_prev);
+      }
+      if (compare(x[1], y[1])) {
+        return compare(x[1], y[1]);
+      }
+    }
+    return 0;
+  });
+}
+
 export default function Search() {
   const [statement, setStatement] = useState<string>();
   const [source, setSource] = useState<string>();
@@ -18,17 +47,7 @@ export default function Search() {
         } else {
           setError(null);
           data.json().then((json: any[]) => {
-            json.sort((a, b) => {
-              const x = (a.source as string).toLowerCase();
-              const y = (b.source as string).toLowerCase();
-              if (x > y) {
-                return 1;
-              } else if (x < y) {
-                return -1;
-              } else {
-                return 0;
-              }
-            });
+            sortResults(json);
             setResults(json);
           });
         }
@@ -136,26 +155,25 @@ export default function Search() {
               e.preventDefault();
               setQuery(e.target.value);
             }}
-            className="w-10/12 rounded-md my-1"
+            className="rounded-md my-1 block w-full"
           />
           <button
-            className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold text-sm sm:text-base rounded-md duration-200 w-fit border border-gray-200"
+            className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200"
             onClick={() => window.print()}
           >
-            Print Result
+            Print
           </button>
         </div>
 
         {error ? <p className="text-red-600 my-2">{error}</p> : null}
       </div>
       <div className="w-full break-inside-avoid-page">
-        <div className="print:visible invisible text-sm">
+        <div className="print:visible invisible text-xs">
+          Created with{" "}
           <strong>
-            Created with <span className="text-blue-800">Search.</span>
+            <span className="text-blue-800">Search.</span>
             MAATester.com
           </strong>{" "}
-          <br />
-          <code>{query}</code>
         </div>
         {results.length
           ? results.map((el, i) => <Result key={i} {...el} />)

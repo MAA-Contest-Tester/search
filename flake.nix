@@ -4,7 +4,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
     flake-utils = {
       url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -17,7 +16,9 @@
         name = "Search.MAATester.com";
       in {
 
-        devShell = pkgs.mkShell { buildInputs = with pkgs; [ go yarn scc redis ]; };
+        devShell = pkgs.mkShell {
+          buildInputs = with pkgs; [ go yarn scc redis gopls ];
+        };
 
         defaultPackage = pkgs.stdenv.mkDerivation { inherit name version; };
 
