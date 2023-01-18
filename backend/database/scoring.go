@@ -23,8 +23,8 @@ func problemScore(p scrape.Problem) float32 {
 		difference := THRESHOLD - res;
 		difference = math.Max(difference, -EXPONENT);
 		difference = math.Min(difference, EXPONENT);
-		return float32(1.0/(1.0 + math.Exp(THRESHOLD - res)))
+		return float32(1.0/(1.0 + 0.1*math.Exp(THRESHOLD - res)))
 	} else {
-		return float32(1.0/(1.0 + math.Exp(EXPONENT)))
+		return float32(1.0/(1.0 + 0.1*math.Exp(EXPONENT)))
 	}
 }
