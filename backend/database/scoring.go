@@ -4,9 +4,13 @@ import (
 	"math"
 	"regexp"
 	"strconv"
-	"time"
 
 	"github.com/MAA-Contest-Tester/search/backend/scrape"
+)
+
+const (
+	// contests before this year should be penalized
+	THRESHOLD = 2010
 )
 
 func problemScore(p scrape.Problem) float32 {
@@ -14,10 +18,8 @@ func problemScore(p scrape.Problem) float32 {
 	num := re.Find([]byte(p.Source))
 	if num != nil {
 		res, _ := strconv.ParseFloat(string(num), 64)
-		res = math.Max(0, float64(res-1900))
-		year := math.Max(1, float64(time.Now().Year()-1900+3))
-		return float32(res) / float32(year)
+		return float32(1.0/(1.0 + math.Exp(THRESHOLD - res)))
 	} else {
-		return 1.0
+		return 0.1
 	}
 }

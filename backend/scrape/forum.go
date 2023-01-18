@@ -29,7 +29,6 @@ type ForumSession struct {
 
 func InitForumSession() ForumSession {
 	sessionre := regexp.MustCompile(`AoPS\.session = ({.*?})`)
-	//f := ForumClient{};
 	resp, err := http.Get("https://artofproblemsolving.com")
 	if err != nil {
 		logger.Fatal(err)
@@ -105,6 +104,9 @@ func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
 	if err != nil || resp == nil || resp.StatusCode != 200 {
 		logger.Println(err)
 		return nil, err
+	}
+	if resp.Body != nil {
+		defer resp.Body.Close();
 	}
 	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -295,6 +297,9 @@ func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
 	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_category_data"}, "category_id": {strconv.Itoa(id)}}))
 	if err != nil {
 		logger.Println(err)
+	}
+	if resp.Body != nil {
+		defer resp.Body.Close();
 	}
 	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {
