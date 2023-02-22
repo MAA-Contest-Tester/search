@@ -1,6 +1,5 @@
-name: Recompile the dataset
-on:
-  workflow_dispatch:
+name: dataset
+on: workflow_dispatch
 
 jobs:
   build:
