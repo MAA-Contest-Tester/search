@@ -2,7 +2,7 @@ name: dataset
 on: workflow_dispatch
 
 jobs:
-  build:
+  dataset:
     env:
       GH_REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
