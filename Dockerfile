@@ -4,8 +4,6 @@ COPY go.mod go.sum /build/
 RUN go mod download
 COPY . /build/
 RUN make
-# supposed to fail; we need to set up the dataset compiling workflow.
-RUN false
 RUN wget\
 https://github.com/MAA-Contest-Tester/search/releases/download/dataset/data.json\
 -O /data/forum.json
