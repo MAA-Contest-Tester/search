@@ -1,0 +1,19 @@
+name: Recompile the dataset
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+      - run: go run backend/main.go dump out/data.json
+      - name: Delete nightly release
+        run: gh release delete dataset --yes || true
+      - name: Upload to releases
+        run: |
+          gh release create dataset --prerelease --title "Search.MAATester.com Dataset" --target $GITHUB_SHA out/*
