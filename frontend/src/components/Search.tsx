@@ -38,9 +38,12 @@ export default function Search() {
   const [query, setQuery] = useState("");
   const [error, setError] = useState<any | null>(null);
   const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const debounced_api = debounce(() => {
+    setLoading(true);
     fetch(`/search?query=${encodeURI(query)}`)
       .then(async (data) => {
+        setLoading(false);
         if (data.status != 200) {
           setResults([]);
           setError(await data.text());
@@ -165,7 +168,8 @@ export default function Search() {
           </button>
         </div>
 
-        {error ? <p className="text-red-600 my-2">{error}</p> : null}
+        {loading ? <p className="text-black my-2 font-bold">Loading...</p> : null}
+        {error ? <p className="text-red-600 my-2 font-bold">{error}</p> : null}
       </div>
       <div className="w-full break-inside-avoid-page">
         <div className="print:visible invisible text-xs">

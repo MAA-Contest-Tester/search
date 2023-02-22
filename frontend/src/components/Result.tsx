@@ -33,6 +33,7 @@ const macros = {
   "\\overarc": "\\overgroup",
   "\\dfrac": "\\frac",
   "\\O": "\\empty",
+  "\\hdots": "\\ldots",
 };
 
 const preprocess = (s: string | undefined) => {
