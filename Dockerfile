@@ -4,9 +4,7 @@ COPY go.mod go.sum /build/
 RUN go mod download
 COPY . /build/
 RUN make
-RUN wget\
-https://github.com/MAA-Contest-Tester/search/releases/download/dataset/data.json\
--O /data/forum.json
+RUN wget https://github.com/MAA-Contest-Tester/search/releases/download/dataset/data.json -O /data/forum.json
 
 FROM node:alpine as frontend
 COPY --from=backend /build/frontend /build/frontend/
