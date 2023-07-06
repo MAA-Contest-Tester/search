@@ -12,9 +12,17 @@ WORKDIR /build/frontend
 RUN yarn install
 RUN yarn build
 
-FROM scratch
+FROM redis/redis-stack-server:7.2.0-RC2 as redis-stack
+
+FROM redis:7.2-rc-bookworm
 WORKDIR /app/
+
 COPY --from=backend /build/out/psearch /app/psearch
 COPY --from=backend /data/forum.json /data/forum.json
 COPY --from=frontend /build/frontend/dist /app/dist
-CMD ["/app/psearch", "server", "-L", "/data/forum.json", "-D", "/app/dist"]
+COPY entrypoint.sh /app/entrypoint.sh
+
+COPY --from=redis-stack /opt/redis-stack/lib/redisearch.so /opt/redis-stack/lib/redisearch.so
+COPY --from=redis-stack /opt/redis-stack/lib/rejson.so /opt/redis-stack/lib/rejson.so
+
+CMD ["/app/entrypoint.sh"]

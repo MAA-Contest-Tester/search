@@ -24,7 +24,7 @@ Run `cd ./frontend && yarn`
 ## Fetch Data
 
 Run `go run ./backend/main.go dump (output json)`. This will fetch the full
-dataset, which may or may not work.
+dataset, which may sometimes fail because of network errors.
 
 You could also do `go run ./backend/main.go dump -C contests/(preference.json) (output json)`, which will only pick a specific set of contests to fetch.
 
@@ -35,6 +35,5 @@ will populate the redis database with problems scraped from AoPS.
 
 # Production
 
-Use the included `./docker-compose.example.yml` as an example for how to set up
-the containers. There needs to be an environment variable connecting the app to
-the redis server.
+Use the included `./docker-compose.example.yml`. The production docker container
+is monolithic and includes all of the dependencies that it requires.
