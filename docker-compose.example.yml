@@ -1,6 +1,6 @@
 version: '2'
 services:
   web:
-    build: .
+    image: junikimm717/psearch
     ports:
       - "7827:7827"
