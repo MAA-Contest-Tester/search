@@ -165,6 +165,21 @@ type CategoryResponse struct {
 	} `json:"response"`
 }
 
+// function to clean out some of the BS people perform on C&P titles
+func ProcessProblemSource(s string) string {
+	// get rid of the random dashes people put on C&P titles
+	s = strings.ReplaceAll(s, "-", " ")
+	// fix 2017 IMO ShortiIst
+	shortiistregex := regexp.MustCompile(`Short[iI][iI]st`)
+	s = shortiistregex.ReplaceAllString(s, "Shortlist")
+	// get rid of redundant "Problems"
+	problemsregex := regexp.MustCompile(`\s*[Pp]roblems*\s*`)
+	s = problemsregex.ReplaceAllString(s, " ")
+	islregex := regexp.MustCompile(`ISL`)
+	s = islregex.ReplaceAllString(s, "IMO Shortlist")
+	return s
+}
+
 func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 	type Topic struct {
 		Problem Problem
@@ -179,8 +194,11 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 		return []Problem{}
 	}
 	for _, p := range items {
+		// the "These problems are copyright of MAA" message
 		announcement := p.PostData.CategoryId == 75
+		// When one of the rows is just a label saying "this is day 2"
 		label := p.PostData.CategoryId == resp.Response.Category.CategoryId
+		// Straight-up when not a post
 		notpost := strings.ToLower(p.Type) != "post"
 		if label {
 			front_label = p.PostData.Rendered
@@ -189,17 +207,19 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 			continue
 		}
 		problem := Problem{
-			Url: fmt.Sprintf(
-				"https://artofproblemsolving.com/community/c%v",
-				resp.Response.Category.CategoryId,
-			),
 			Source: fmt.Sprintf(
 				"%v %v Problem %v",
-				resp.Response.Category.Name,
+				// e.g. "2023 USAMO"
+				ProcessProblemSource(resp.Response.Category.Name),
+				// e.g. "Day 2"
 				front_label,
 				p.Title,
 			),
 			Statement: p.PostData.Rendered,
+			Url: fmt.Sprintf(
+				"https://artofproblemsolving.com/community/c%v",
+				resp.Response.Category.CategoryId,
+			),
 			Solution: fmt.Sprintf(
 				"https://artofproblemsolving.com/community/c%vh%vp%v",
 				resp.Response.Category.CategoryId,
