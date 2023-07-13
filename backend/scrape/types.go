@@ -16,7 +16,13 @@ type Contest struct {
 // key is general category (e.g. olympiad, USA contests, etc)
 type ContestList map[string][]Contest
 
+type Meta struct {
+	Contests ContestList `json:"contestlist"`
+	ProblemCount int `json:"problemcount"`
+	Date string `json:"date"`
+}
+
 type ScrapeResult struct {
-	Contests ContestList
+	Meta Meta `json:"meta"`
 	Problems []Problem `json:"problems"`
 }

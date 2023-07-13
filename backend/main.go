@@ -25,7 +25,7 @@ func fileExists(path string) {
 var client database.SearchClient = *database.Client()
 
 func loadDataset(jsonfile string) {
-	var dataset []scrape.Problem
+	var dataset scrape.ScrapeResult
 	fileExists(jsonfile)
 	log.Printf("Loading Dataset from %v", jsonfile)
 	data, err := os.ReadFile(jsonfile)
@@ -38,8 +38,8 @@ func loadDataset(jsonfile string) {
 		fmt.Fprintf(os.Stderr, "Error while parsing JSON at %v! %v\n", jsonfile, err)
 		os.Exit(1)
 	}
-	log.Printf("Inserting %v points into Redis...", len(dataset))
-	client.AddProblems(dataset)
+	log.Printf("Inserting %v points into Redis...", len(dataset.Problems))
+	client.AddProblems(dataset.Problems)
 	log.Println("Done")
 }
 
