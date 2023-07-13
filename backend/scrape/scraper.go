@@ -8,13 +8,13 @@ import (
 
 var logger = log.New(os.Stderr, "[Scraper Info]  ", 0)
 
-func (session *ForumSession) ScrapeForumList(categories []int) []Problem {
+func (session *ForumSession) ScrapeForumList(contests []int) []Problem {
 	w := sync.WaitGroup{}
-	channel := make(chan []Problem, len(categories))
-	for _, id := range categories {
+	channel := make(chan []Problem, len(contests))
+	for _, id := range contests {
 		w.Add(1)
 		go func(w *sync.WaitGroup, channel chan []Problem, id int) {
-			resp, err := session.GetCategory(id)
+			resp, err := session.GetCategoryItems(id)
 			if err != nil {
 				logger.Println("Error", err)
 			} else {

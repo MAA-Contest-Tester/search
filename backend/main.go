@@ -24,33 +24,29 @@ func fileExists(path string) {
 
 var client database.SearchClient = *database.Client()
 
-func loadDataset(jsonfile *string) {
+func loadDataset(jsonfile string) {
 	var dataset []scrape.Problem
-	if jsonfile != nil {
-		fileExists(*jsonfile)
-		data, err := os.ReadFile(*jsonfile)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while reading %v! %v\n", *jsonfile, err)
-			os.Exit(1)
-		}
-		err = json.Unmarshal(data, &dataset)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while parsing JSON at %v! %v\n", *jsonfile, err)
-			os.Exit(1)
-		}
-		log.Printf("Loading Dataset from %v", *jsonfile)
-	} else {
-		dataset = scrape.ScrapeForumDefaults()
+	fileExists(jsonfile)
+	log.Printf("Loading Dataset from %v", jsonfile)
+	data, err := os.ReadFile(jsonfile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while reading %v! %v\n", jsonfile, err)
+		os.Exit(1)
+	}
+	err = json.Unmarshal(data, &dataset)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while parsing JSON at %v! %v\n", jsonfile, err)
+		os.Exit(1)
 	}
 	log.Printf("Inserting %v points into Redis...", len(dataset))
 	client.AddProblems(dataset)
 	log.Println("Done")
 }
 
-func dumpDataset(filename *string, contests string) {
+func dumpDataset(output *string, contests string) {
 	var out io.Writer = os.Stdout
-	if filename != nil {
-		filename := *filename
+	if output != nil {
+		filename := *output
 		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while creating dirs for %v! %v\n", filename, err)
@@ -63,11 +59,11 @@ func dumpDataset(filename *string, contests string) {
 		}
 		out = out_tmp
 	}
-	var dataset []scrape.Problem
+	var dataset scrape.ScrapeResult
 	if len(contests) == 0 {
-		dataset = scrape.ScrapeForumDefaults()
+		log.Fatal("no contest specified")
 	} else {
-		var categories []int
+		var categories scrape.ContestList
 		fileExists(contests)
 		b, err := os.ReadFile(contests)
 		if err != nil {
@@ -91,7 +87,7 @@ func startServer(dir *string, port int, load []string) {
 	if len(load) > 0 {
 		client.Drop()
 		for _, l := range load {
-			loadDataset(&l)
+			loadDataset(l)
 		}
 	}
 	mux := server.InitServer(dir)
@@ -108,15 +104,15 @@ func main() {
 			dumpDataset(nil, contests)
 		}
 	}}
-	dump.Flags().StringP("contests", "C", "", "list of contests to parse (everything if this file is not specified)")
+	dump.Flags().StringP("contests", "C", "", "list of contests to parse")
 	load := &cobra.Command{Use: "load [files...]", Aliases: []string{"l"}, Run: func(cmd *cobra.Command, args []string) {
 		if len(args) >= 1 {
 			client.Drop()
 			for _, a := range args {
-				loadDataset(&a)
+				loadDataset(a)
 			}
 		} else {
-			loadDataset(nil)
+			log.Fatal("No dataset json file specified!")
 		}
 	}}
 	server := &cobra.Command{Use: "server", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {

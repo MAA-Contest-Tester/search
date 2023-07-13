@@ -5,9 +5,11 @@ import (
 	"sync"
 )
 
-var forums = []int{
-	3416,   //aime
-	3414,   //amc 10
+/*
+[]int {
+	
+	3416,   // aime
+	3414,   // amc 10
 	3415,   // amc 12
 	3413,   // amc 8
 	3427,   // mpfg
@@ -49,9 +51,10 @@ var forums = []int{
 	3426,    // pumac
 	233906,  // bamo
 }
+*/
 
 func (session *ForumSession) scrapeForumPage(id int) []int {
-	resp, err := session.GetCategory(id)
+	resp, err := session.GetCategoryItems(id)
 	if err != nil {
 		log.Println("err", err)
 		return []int{}
@@ -63,26 +66,32 @@ func (session *ForumSession) scrapeForumPage(id int) []int {
 	return res
 }
 
-func ScrapeForumDefaults() []Problem {
-	return ScrapeForumCategories(forums)
-}
-
-func ScrapeForumCategories(categories []int) []Problem {
+func ScrapeForumCategories(contestlist ContestList) ScrapeResult {
 	session := InitForumSession()
 	res := make([]int, 0)
-	channel := make(chan []int, len(forums))
+	
+	contestlist_length := 0
+	for _, contests := range contestlist {
+		contestlist_length += len(contests)
+	}
+	channel := make(chan []int, contestlist_length)
 	wg := sync.WaitGroup{}
-	for _, id := range categories {
-		wg.Add(1)
-		go func(w *sync.WaitGroup, ch chan []int, id int) {
-			ch <- session.scrapeForumPage(id)
-			w.Done()
-		}(&wg, channel, id)
+	for _, contests := range contestlist {
+		for _, contest := range contests {
+			wg.Add(1)
+			go func(w *sync.WaitGroup, ch chan []int, id int) {
+				ch <- session.scrapeForumPage(id)
+				w.Done()
+			}(&wg, channel, contest.Id)
+		}
 	}
 	wg.Wait()
 	close(channel)
 	for x := range channel {
 		res = append(res, x...)
 	}
-	return session.ScrapeForumList(res)
+	return ScrapeResult {
+		Contests: contestlist,
+		Problems: session.ScrapeForumList(res),
+	}
 }

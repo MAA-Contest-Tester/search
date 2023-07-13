@@ -276,6 +276,14 @@ func reduceWidth(attr string) string {
 	}
 }
 
+/*
+This function takes each problem statement (rendered as HTML) on AoPS and performs several processing steps:
+
+- Have all asymptote images thet e
+- Replace all image nodes with \includegraphics{...} so that it can be rendered by KaTeX
+- Remove any images that are supposed to render LaTeX snippets and replace them with plain text snippets (i.e. $expression...$)
+
+*/
 func parseProblemRenderedHTML(text string) (string, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(text))
 	if err != nil {
@@ -287,6 +295,8 @@ func parseProblemRenderedHTML(text string) (string, error) {
 		node = node.FirstChild.FirstChild.NextSibling
 		for child := node.FirstChild; child != nil; child = child.NextSibling {
 			if child.Type == html.TextNode {
+				// sometimes people put an actual dollar sign instead of
+				// textdollar and this screws up all of the rendering later on
 				child.Data = strings.ReplaceAll(child.Data, "$", `$\textdollar$`)
 			}
 		}
@@ -294,7 +304,7 @@ func parseProblemRenderedHTML(text string) (string, error) {
 	doc.Find("img[alt].latex, img[alt].latexcenter").Each(func(i int, s *goquery.Selection) {
 		s.SetText(s.AttrOr("alt", ""))
 	})
-	doc.Find("img[src].asy-image").Each(func(i int, s *goquery.Selection) {
+	doc.Find("img[src].asy-image, img[src].bbcode_img").Each(func(i int, s *goquery.Selection) {
 		s.SetText(
 			fmt.Sprintf(
 				"$\\includegraphics[width=%v, height=%v, totalheight=%v]{https:%v}$",
@@ -309,7 +319,23 @@ func parseProblemRenderedHTML(text string) (string, error) {
 	return t, nil
 }
 
-func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
+/*
+
+This is one function to take care of two different cases (but are the same
+problem because of the recursive structure of AoPS categories):
+
+1. Parsing out the problems from a specific year of a specific contest.
+   e.g. Parsing all the problems from
+   https://artofproblemsolving.com/community/c3381519 (The 2023 IMO Problems
+   Category)
+2. Parsing out all of the contest years of a specific contest
+   e.g. Parsing out
+   https://artofproblemsolving.com/community/c3223_imo_shortlist (The Collection
+   that contains all IMO Shortlist Collections from every year)
+
+*/
+
+func (f *ForumSession) GetCategoryItems(id int) (*CategoryResponse, error) {
 	logger.Println("Parsing Forum Category", id, "...")
 	client := http.Client{
 		Timeout: time.Minute * 20,
@@ -340,6 +366,8 @@ func (f *ForumSession) GetCategory(id int) (*CategoryResponse, error) {
 		return nil, err
 	} else {
 		for i, x := range serialized.Response.Category.Items {
+			// in the second case described above, this effectively does
+			// nothing.
 			r, err := parseProblemRenderedHTML(x.PostData.Rendered)
 			if err != nil {
 				logger.Fatal(err)

@@ -24,11 +24,8 @@ Run `cd ./frontend && yarn`
 
 ## Fetch Data
 
-Run `go run ./backend/main.go dump (output json)`. This will fetch the full
-dataset, which may sometimes fail because of network errors.
-
-You could also do `go run ./backend/main.go dump -C contests/(preference.json)
-(output json)`, which will only pick a specific set of contests to fetch.
+Run `go run ./backend/main.go dump -C contests/(preference.json)
+(output json)`, which will pick a specific set of contests to fetch.
 
 On the other hand, if you are not working with the scraper, you can always
 download it from the releases page.
