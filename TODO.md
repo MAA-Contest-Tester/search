@@ -8,5 +8,12 @@
 - [ ] add some kind of UI for people to drag and drop problems of their choice
 - [ ] dark mode
 
-- [ ] change data.json layout to include the name of the contests that were scraped
-- [ ] change input json to be more flexible and accept single contests instead of just collections of contests
+- [x] change data.json layout to include the name of the contests that were scraped
+- [x] change input json to be more flexible and accept single contests instead of just collections of contests
+
+# Proposals
+
+- [ ] Move to Meilisearch
+- [ ] Change site architecture and move to SSR (So that problems get
+      pre-rendered)
+    - [ ] Configure KaTeX so that it's not client-side dependent.
