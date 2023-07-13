@@ -1,8 +1,13 @@
 name: dataset
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 7'
+
 
 jobs:
   dataset:
+    timeout-minutes: 10 # if it takes more than 2 minutes, there's a network error.
     env:
       GH_REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
