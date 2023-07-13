@@ -46,8 +46,8 @@ The dataset that search.maatester.com uses is updated weekly by GitHub
 Actions. It can be accessed at
 https://github.com/MAA-Contest-Tester/search/releases/download/dataset/data.json
 
-`data.json` contains a list of 17,000 problems from various short-answer and
-olympiad contests. Each entry on contains the following fields:
+`main.json` contains a list of 17,000 problems from various short-answer and
+olympiad contests. Each entry contains the following fields:
 
 - The source of the problem and its number (i.e. 2023 IMO 1),
 - A link to its source on C&P (e.g.
