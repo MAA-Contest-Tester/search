@@ -22,7 +22,7 @@ func fileExists(path string) {
 	}
 }
 
-var client database.SearchClient = *database.Client()
+var client database.SearchClient = database.InitMeiliSearchClient()
 
 func loadDataset(jsonfile string) {
 	var dataset scrape.ScrapeResult
@@ -38,7 +38,7 @@ func loadDataset(jsonfile string) {
 		fmt.Fprintf(os.Stderr, "Error while parsing JSON at %v! %v\n", jsonfile, err)
 		os.Exit(1)
 	}
-	log.Printf("Inserting %v points into Redis...", len(dataset.Problems))
+	log.Printf("Inserting %v points into the dataset...", len(dataset.Problems))
 	client.AddProblems(dataset.Problems)
 	log.Println("Done")
 }

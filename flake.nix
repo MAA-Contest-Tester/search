@@ -17,7 +17,7 @@
       in {
 
         devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [ go yarn scc redis gopls ];
+          buildInputs = with pkgs; [ go yarn scc redis meilisearch gopls ];
         };
 
         defaultPackage = pkgs.stdenv.mkDerivation { inherit name version; };

@@ -22,7 +22,7 @@ func (session *ForumSession) scrapeForumPage(id int) []int {
 func ScrapeForumCategories(contestlist ContestList) ScrapeResult {
 	session := InitForumSession()
 	res := make([]int, 0)
-	
+
 	contestlist_length := 0
 	for _, contests := range contestlist {
 		contestlist_length += len(contests)
@@ -44,11 +44,11 @@ func ScrapeForumCategories(contestlist ContestList) ScrapeResult {
 		res = append(res, x...)
 	}
 	problems := session.ScrapeForumList(res)
-	return ScrapeResult {
-		Meta: Meta {
-			Contests: contestlist,
+	return ScrapeResult{
+		Meta: Meta{
+			Contests:     contestlist,
 			ProblemCount: len(problems),
-			Date: time.Now().Format("2006.01.02 15:04:05"),
+			Date:         time.Now().Format("2006.01.02 15:04:05"),
 		},
 		Problems: session.ScrapeForumList(res),
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/MAA-Contest-Tester/search/backend/database"
 )
 
-var client *database.SearchClient
+var client database.SearchClient
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "API Reached!")
@@ -32,7 +32,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 func InitServer(path *string) *http.ServeMux {
 	mux := http.NewServeMux()
-	client = database.Client()
+	client = database.InitMeiliSearchClient()
 	if path != nil {
 		fileserver := http.FileServer(http.Dir(*path))
 		mux.Handle("/", fileserver)

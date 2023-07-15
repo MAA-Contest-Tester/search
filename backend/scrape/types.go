@@ -9,7 +9,7 @@ type Problem struct {
 }
 
 type Contest struct {
-	Id int `json:"id"`
+	Id   int    `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -17,12 +17,12 @@ type Contest struct {
 type ContestList map[string][]Contest
 
 type Meta struct {
-	Contests ContestList `json:"contestlist"`
-	ProblemCount int `json:"problemcount"`
-	Date string `json:"date"`
+	Contests     ContestList `json:"contestlist"`
+	ProblemCount int         `json:"problemcount"`
+	Date         string      `json:"date"`
 }
 
 type ScrapeResult struct {
-	Meta Meta `json:"meta"`
+	Meta     Meta      `json:"meta"`
 	Problems []Problem `json:"problems"`
 }

@@ -106,7 +106,7 @@ func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
 		return nil, err
 	}
 	if resp.Body != nil {
-		defer resp.Body.Close();
+		defer resp.Body.Close()
 	}
 	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -282,7 +282,6 @@ This function takes each problem statement (rendered as HTML) on AoPS and perfor
 - Have all asymptote images thet e
 - Replace all image nodes with \includegraphics{...} so that it can be rendered by KaTeX
 - Remove any images that are supposed to render LaTeX snippets and replace them with plain text snippets (i.e. $expression...$)
-
 */
 func parseProblemRenderedHTML(text string) (string, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(text))
@@ -345,7 +344,7 @@ func (f *ForumSession) GetCategoryItems(id int) (*CategoryResponse, error) {
 		logger.Println(err)
 	}
 	if resp.Body != nil {
-		defer resp.Body.Close();
+		defer resp.Body.Close()
 	}
 	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {

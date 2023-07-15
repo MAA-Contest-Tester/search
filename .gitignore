@@ -22,6 +22,7 @@ go.work
 
 .DS_Store
 /redis-data
+/meilisearch-data
 /out
 /search
 *.log
