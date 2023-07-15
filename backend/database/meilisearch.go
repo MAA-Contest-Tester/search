@@ -1,11 +1,11 @@
 package database
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/MAA-Contest-Tester/search/backend/scrape"
 	"github.com/meilisearch/meilisearch-go"
@@ -48,6 +48,7 @@ func calculateSynonyms() map[string][]string {
 		"rmm":              {"romanian masters"},
 		"hmmt":             {"Harvard MIT Mathematics"},
 		"smt":              {"Stanford Mathematics Tournament"},
+		"bmt":              {"berkeley math tournament"},
 		"pumac":            {"Princeton University Math"},
 		"jmo":              {"usajmo"},
 		"amo":              {"usamo"},
@@ -61,11 +62,11 @@ func calculateSynonyms() map[string][]string {
 		"fe":    {"functional equation"},
 	}
 	// A1 => Algebra 1, G8 => Geometry 8, ...
-	categories := map[string]string{"a": "algebra", "g": "geometry", "n": "number theory", "c": "combinatorics"}
+	categories := map[string]string{"a": "algebra", "g": "geometry", "n": "nt", "c": "combinatorics"}
 	for key, value := range categories {
 		for i := 1; i < 12; i++ {
 			short := fmt.Sprintf("%v%v", key, i)
-			long := fmt.Sprintf("%v %v", value, i)
+			long := fmt.Sprintf("%v problem %v", value, i)
 			synonyms[short] = []string{long}
 			synonyms[long] = []string{short}
 		}
@@ -73,19 +74,34 @@ func calculateSynonyms() map[string][]string {
 	return synonyms
 }
 
+func SourceToId(source string) string {
+	source = strings.ToLower(source)
+	runes := []rune(source)
+	res := []rune{}
+	for _, r := range runes {
+		switch {
+		case ('0' <= r && r <= '9') || 'a' <= r && r <= 'z':
+			res = append(res, r)
+		case r == ' ':
+			res = append(res, rune('-'))
+		}
+	}
+	return string(res)
+}
+
 func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 	docs := make([]map[string]interface{}, 0)
 	order := []string{"source", "categories", "statement"}
 	settings := meilisearch.Settings{
-		SearchableAttributes: []string{"source", "categories", "statement"},
+		SearchableAttributes: []string{"source", "statement", "categories"},
 		Synonyms:             calculateSynonyms(),
 		RankingRules: []string{
 			"attribute",
-			"words",
-			"proximity",
-			"typo",
-			"sort",
 			"exactness",
+			"proximity",
+			"words",
+			"sort",
+			"typo",
 			"year:desc",
 		},
 		StopWords: []string{
@@ -115,10 +131,9 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 		if err != nil {
 			logger.Fatal(err)
 		}
-		h := sha256.New()
-		h.Write([]byte(doc["rendered"].(string)))
+		// TODO: set doc[id] to a urlized version of the source.
 
-		doc["id"] = fmt.Sprintf("%x",h.Sum(nil))
+		doc["id"] = SourceToId(doc["source"].(string))
 		doc["year"] = extractYear(p)
 
 		docs = append(docs, doc)

@@ -152,7 +152,7 @@ type Post struct {
 		PostId     int    `json:"post_id"`
 		CategoryId int    `json:"category_id"`
 		Rendered   string `json:"post_rendered"`
-		Canonical   string `json:"post_canonical"`
+		Canonical  string `json:"post_canonical"`
 	} `json:"post_data"`
 }
 
@@ -171,14 +171,48 @@ func ProcessProblemSource(s string) string {
 	// get rid of the random dashes people put on C&P titles
 	s = strings.ReplaceAll(s, "-", " ")
 	// fix 2017 IMO ShortiIst
-	shortiistregex := regexp.MustCompile(`Short[iI][iI]st`)
-	s = shortiistregex.ReplaceAllString(s, "Shortlist")
+	shortiIstregex := regexp.MustCompile(`Short[iI][iI]st`)
+	s = shortiIstregex.ReplaceAllString(s, "Shortlist")
 	// get rid of redundant "Problems"
-	problemsregex := regexp.MustCompile(`\s*[Pp]roblems*\s*`)
-	s = problemsregex.ReplaceAllString(s, " ")
-	islregex := regexp.MustCompile(`ISL`)
-	s = islregex.ReplaceAllString(s, "IMO Shortlist")
+	problemsRegex := regexp.MustCompile(`\s*[Pp]roblems*\s*`)
+	s = problemsRegex.ReplaceAllString(s, " ")
+	islRegex := regexp.MustCompile(`ISL`)
+	s = islRegex.ReplaceAllString(s, "IMO Shortlist")
 	return s
+}
+
+// disqualify tags that represent contests because they pollute search results.
+var contestRegex []regexp.Regexp = []regexp.Regexp{
+	*regexp.MustCompile(`.*sl$`),
+	*regexp.MustCompile(`.*mo$`),
+	*regexp.MustCompile(`.*[ms]t$`),
+	*regexp.MustCompile(`amc|aime`),
+	*regexp.MustCompile(`\d{4}`),
+}
+
+func ProcessTags(s string) string {
+	words := strings.Fields(s)
+	processed := make([]string, 0)
+	seen := map[string]int{}
+	for _, word := range words {
+		include := true
+		word = strings.ToLower(word)
+
+		for _, re := range contestRegex {
+			if re.Match([]byte(word)) {
+				include = false
+			}
+		}
+		if _, exists := seen[word]; exists {
+			include = false
+		}
+
+		if include {
+			processed = append(processed, word)
+			seen[word] = 1
+		}
+	}
+	return strings.Join(processed, " ")
 }
 
 func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
@@ -217,7 +251,7 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 				p.Title,
 			),
 			Statement: p.PostData.Canonical,
-			Rendered: p.PostData.Rendered,
+			Rendered:  p.PostData.Rendered,
 			Url: fmt.Sprintf(
 				"https://artofproblemsolving.com/community/c%v",
 				resp.Response.Category.CategoryId,
@@ -252,7 +286,9 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 			for _, tag := range t.Response.Topic.Tags {
 				tags = append(tags, tag.Text)
 			}
-			x.Problem.Categories = strings.Join(tags, " ")
+			x.Problem.Categories = ProcessTags(
+				strings.Join(tags, " "),
+			)
 			channel <- x.Problem
 			wg.Done()
 		}(channel, &wg, x)
