@@ -76,8 +76,8 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 		Synonyms:             calculateSynonyms(),
 		RankingRules: []string{
 			"attribute",
-			"proximity",
 			"words",
+			"proximity",
 			"typo",
 			"sort",
 			"exactness",

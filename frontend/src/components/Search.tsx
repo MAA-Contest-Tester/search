@@ -2,39 +2,8 @@ import { useEffect, useState } from "react";
 import Result from "./Result";
 import { debounce } from "debounce";
 
-const mtch = /Problem (.*)/;
-
-function sortResults(data: { source: string }[]) {
-  data.sort((a, b) => {
-    const x = mtch.exec(a.source);
-    const y = mtch.exec(b.source);
-    const compare = (x: any, y: any) => {
-      if (x > y) {
-        return 1;
-      } else if (x < y) {
-        return -1;
-      } else {
-        return 0;
-      }
-    };
-    if (x && y) {
-      const a_prev = a.source.slice(0, x.index);
-      const b_prev = b.source.slice(0, y.index);
-      if (compare(b_prev, a_prev)) {
-        return compare(b_prev, a_prev);
-      }
-      if (compare(x[1], y[1])) {
-        return compare(x[1], y[1]);
-      }
-    }
-    return 0;
-  });
-}
 
 export default function Search() {
-  const [statement, setStatement] = useState<string>();
-  const [source, setSource] = useState<string>();
-  const [categories, setCategories] = useState<string>();
   const [query, setQuery] = useState("");
   const [error, setError] = useState<any | null>(null);
   const [results, setResults] = useState<any[]>([]);
@@ -50,7 +19,6 @@ export default function Search() {
         } else {
           setError(null);
           data.json().then((json: any[]) => {
-            sortResults(json);
             setResults(json);
           });
         }
@@ -63,24 +31,6 @@ export default function Search() {
     debounced_api();
   }, [query]);
 
-  useEffect(() => {
-    let q = "";
-    const whitespace = new RegExp("^s*$");
-    if (!whitespace.test(statement || "")) {
-      const c = (statement || "").trim();
-      q += `@statement:(${c}*)`;
-    }
-    if (!whitespace.test(source || "")) {
-      const c = (source || "").trim();
-      q += `@source:(${c})`;
-    }
-    if (!whitespace.test(categories || "")) {
-      const c = (categories || "").trim();
-      q += `@categories:(${c}*)`;
-    }
-    setQuery(q);
-  }, [statement, source, categories]);
-
   const queryExample = (q: string) => (
     <button
       className="underline rounded-md hover:text-blue-800 decoration-blue-800 inline font-mono text-left"
@@ -92,63 +42,12 @@ export default function Search() {
   return (
     <>
       <div className="print:hidden">
+      Try searching for keywords (e.g. {queryExample("moving points")} or
+      {" "}{queryExample("inequality")}). You could also search for problems from a
+      specific year or contest ({queryExample("2022 ISL G8")}). Some common
+      abbreviations will work ({queryExample("fe")}, {queryExample("nt")}, etc)
         <p className="my-3 mx-0 text-xs sm:text-sm max-w-fit">
-          Type the text you want to search for (e.g. {queryExample("complex")}{" "}
-          or {queryExample("polynomial")}), or you can use redisearch's querying
-          capabilities. For example, to just search for USAMO geometry problems,
-          type
-          {queryExample("@source:(USAMO) @categories:(geometry)")}. To search
-          for AMC 10 Problems with "mean", search{" "}
-          {queryExample("@source:(AMC 10) mean")}. Or for Olympiad Algebra
-          Problems about inequalities, search{" "}
-          {queryExample("@source:(*MO) @categories:(algebra inequality)")}.
-          Wildcard searching is also allowed, such as {queryExample("*count*")}.
-          You can also mix and match all of the above, such as{" "}
-          {queryExample(
-            "@source:(AIME) @statement:(complex) @categories:(number theory)"
-          )}
-          , which searches for AIME number theory problems about complex
-          numbers.
         </p>
-        <div className="border-gray-200 rounded-lg p-3 my-2 border">
-          <h2 className="font-extrabold text-xl">Query Helper</h2>
-          <label className="grid grid-cols-3 md:grid-cols-4 items-center">
-            <span className="inline mr-3 col-span-1">Problem Source</span>
-            <input
-              type="text"
-              placeholder="Source (e.g. Contest Name, Year, Problem Number)"
-              onChange={(e) => {
-                e.preventDefault();
-                setSource(e.target.value);
-              }}
-              className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
-            />
-          </label>
-          <label className="grid grid-cols-3 md:grid-cols-4 items-center">
-            <span className="inline mr-3 col-span-1">Problem Statement</span>
-            <input
-              type="text"
-              placeholder="Text that matches your problem"
-              onChange={(e) => {
-                e.preventDefault();
-                setStatement(e.target.value);
-              }}
-              className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
-            />
-          </label>
-          <label className="grid grid-cols-3 md:grid-cols-4 items-center">
-            <span className="inline mr-3 col-span-1">Categories</span>
-            <input
-              type="text"
-              placeholder="Categories (e.g. Geometry, Complex, Functional...)"
-              onChange={(e) => {
-                e.preventDefault();
-                setCategories(e.target.value);
-              }}
-              className="w-full rounded-md my-1 inline-block col-span-2 md:col-span-3"
-            />
-          </label>
-        </div>
         <div className="flex flex-row flex-wrap justify-between">
           <input
             type="text"

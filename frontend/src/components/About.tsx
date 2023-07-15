@@ -93,40 +93,6 @@ export default function About() {
         Over <strong>17000</strong> Problems. <strong>Instant Handouts</strong>{" "}
         with printer friendliness.
       </p>
-      <div className="mx-0 border-gray-200 border p-1 rounded-lg transition-all transform duration-1000">
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setOpen(!open);
-          }}
-          className="my-2 py-1 w-full text-left font-extrabold flex justify-between text-sm"
-        >
-          <span>Supported Contests:</span>
-          <span className="mx-2">{open ? "-" : "+"}</span>
-        </button>
-        {open
-          ? supported.map((category, i) => (
-              <>
-                <h1 className="text-lg font-bold text-center mt-2" key={i}>
-                  {category[0]}
-                </h1>
-                <hr />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mt-2 text-xs">
-                  {category[1].map((contest, i) => (
-                    <a
-                      className="p-[1px] font-bold"
-                      href={`https://artofproblemsolving.com/community/c${contest[1]}`}
-                      target="_blank"
-                      key={i}
-                    >
-                      {contest[0]}
-                    </a>
-                  ))}
-                </div>
-              </>
-            ))
-          : null}
-      </div>
     </div>
   );
 }
