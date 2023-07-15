@@ -4,6 +4,7 @@ type Problem struct {
 	Url        string `json:"url"`
 	Source     string `json:"source"`
 	Statement  string `json:"statement"`
+	Rendered  string `json:"rendered"`
 	Solution   string `json:"solution"`
 	Categories string `json:"categories"`
 }

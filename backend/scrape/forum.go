@@ -152,6 +152,7 @@ type Post struct {
 		PostId     int    `json:"post_id"`
 		CategoryId int    `json:"category_id"`
 		Rendered   string `json:"post_rendered"`
+		Canonical   string `json:"post_canonical"`
 	} `json:"post_data"`
 }
 
@@ -215,7 +216,8 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 				front_label,
 				p.Title,
 			),
-			Statement: p.PostData.Rendered,
+			Statement: p.PostData.Canonical,
+			Rendered: p.PostData.Rendered,
 			Url: fmt.Sprintf(
 				"https://artofproblemsolving.com/community/c%v",
 				resp.Response.Category.CategoryId,
@@ -371,7 +373,7 @@ func (f *ForumSession) GetCategoryItems(id int) (*CategoryResponse, error) {
 			if err != nil {
 				logger.Fatal(err)
 			}
-			serialized.Response.Category.Items[i].PostData.Rendered = r
+			serialized.Response.Category.Items[i].PostData.Canonical = r
 		}
 		logger.Println("Finished Parsing Forum Category", id)
 		return &serialized, nil

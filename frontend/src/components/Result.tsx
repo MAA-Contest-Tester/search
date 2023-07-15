@@ -71,7 +71,7 @@ export default function Result(props: {
     }
   });
   const preprocessed = preprocess(props.statement);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   return (
     <div
       className={
