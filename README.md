@@ -18,7 +18,7 @@ Run `cd ./frontend && yarn`
 
 ## Development Servers
 
-1. Start Redis Stack by running either `docker-compose up -d` or `docker compose up -d`.
+1. Start Meilisearch by running either `docker-compose up -d` or `docker compose up -d`.
 2. Start the backend server. In the project root, run `go run ./backend/main.go server`.
 3. Start the frontend vite server by running `cd ./frontend && yarn dev`.
 

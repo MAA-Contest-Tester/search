@@ -1,6 +1,7 @@
 package database
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -44,6 +45,10 @@ func calculateSynonyms() map[string][]string {
 		"shortlist":     {"sl"},
 
 		"bmo":              {"balkan mo"},
+		"rmm":              {"romanian masters"},
+		"hmmt":             {"Harvard MIT Mathematics"},
+		"smt":              {"Stanford Mathematics Tournament"},
+		"pumac":            {"Princeton University Math"},
 		"jmo":              {"usajmo"},
 		"amo":              {"usamo"},
 		"mpfg":             {"math prize girls"},
@@ -96,7 +101,7 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 	}
 
 	whitespace := regexp.MustCompile(`^\s*$`)
-	for id, p := range problems {
+	for _, p := range problems {
 		// do not include problems in the database that contain literally nothing.
 		if whitespace.Match([]byte(p.Statement)) || whitespace.Match([]byte(p.Solution)) {
 			continue
@@ -110,8 +115,10 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 		if err != nil {
 			logger.Fatal(err)
 		}
+		h := sha256.New()
+		h.Write([]byte(doc["rendered"].(string)))
 
-		doc["id"] = id
+		doc["id"] = fmt.Sprintf("%x",h.Sum(nil))
 		doc["year"] = extractYear(p)
 
 		docs = append(docs, doc)
