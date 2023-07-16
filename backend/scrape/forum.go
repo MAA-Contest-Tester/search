@@ -382,6 +382,15 @@ func parseProblemRenderedHTML(text string) (string, error) {
 			),
 		)
 	})
+	doc.Find("img[src].bbcode_img").Each(func(i int, s *goquery.Selection) {
+		s.SetText(
+			fmt.Sprintf(
+				"$\\includegraphics[height=%v, totalheight=%v]{%v}$",
+				"7em", "7em",
+				s.AttrOr("src", ""),
+			),
+		)
+	})
 	t := doc.Text()
 	return t, nil
 }

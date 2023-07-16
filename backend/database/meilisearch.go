@@ -43,6 +43,7 @@ func calculateSynonyms() map[string][]string {
 		"imo shortlist": {"isl"},
 		"sl":            {"shortlist"},
 		"shortlist":     {"sl"},
+		"mo":            {"math-olympiad", "national-olympiad"},
 
 		"tst":                 {"team selection test"},
 		"team selection test": {"tst"},
@@ -60,20 +61,23 @@ func calculateSynonyms() map[string][]string {
 		"mpfg":             {"math-prize-for-girls"},
 		"math prize girls": {"mpfg"},
 
-		"geo":   {"geometry"},
+		"geo":   {"geometry", "geometrical"},
 		"alg":   {"algebra"},
 		"nt":    {"number theory"},
-		"combo": {"combinatorics"},
+		"combo": {"combinatorics", "combinatorial"},
 		"fe":    {"functional equation"},
+		"mmp":   {"method-of-moving-points"},
 	}
 	// A1 => Algebra 1, G8 => Geometry 8, ...
 	categories := map[string]string{"a": "algebra", "g": "geometry", "n": "number-theory", "c": "combinatorics"}
 	for key, value := range categories {
 		for i := 1; i < 12; i++ {
 			short := fmt.Sprintf("%v%v", key, i)
-			long := fmt.Sprintf("%v problem %v", value, i)
-			synonyms[short] = []string{long}
-			synonyms[long] = []string{short}
+			long := fmt.Sprintf("%v-problem-%v", value, i)
+			longer := fmt.Sprintf("%v-problem-%v%v", value, key, i)
+			synonyms[short] = []string{long, longer}
+			synonyms[long] = []string{short, longer}
+			synonyms[longer] = []string{short, long}
 		}
 	}
 	return synonyms
