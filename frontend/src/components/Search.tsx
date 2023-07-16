@@ -8,7 +8,8 @@ export default function Search() {
   const [error, setError] = useState<any | null>(null);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const debounced_api = debounce(() => {
+  const [showTags, setShowTags] = useState<boolean>(false);
+  const apicall = () => {
     setLoading(true);
     fetch(`/search?query=${encodeURI(query)}`)
       .then(async (data) => {
@@ -19,16 +20,17 @@ export default function Search() {
         } else {
           setError(null);
           data.json().then((json: any[]) => {
-            setResults(json);
+            setResults(json.map(x => x["_formatted"]));
           });
         }
       })
       .catch((_) => {
         setError(error);
       });
-  }, 100);
+  };
   useEffect(() => {
-    debounced_api();
+    const debounced_api = setTimeout(() => apicall(), 200);
+    return () => clearTimeout(debounced_api);
   }, [query]);
 
   const queryExample = (q: string) => (
@@ -65,6 +67,16 @@ export default function Search() {
           >
             Print
           </button>
+          <div className="items-center flex">
+            <span className="mx-1 text-sm font-bold">Show Tags</span>
+            <input
+              type="checkbox"
+              className="rounded-sm"
+              alt="Include when printing?"
+              checked={showTags}
+              onChange={() => setShowTags(!showTags)}
+            />
+            </div>
         </div>
 
         {loading ? <p className="text-black my-2 font-bold">Loading...</p> : null}
@@ -79,7 +91,7 @@ export default function Search() {
           </strong>{" "}
         </div>
         {results.length
-          ? results.map((el, i) => <Result key={i} {...el} />)
+          ? results.map((el, i) => <Result key={i} {...el} showtags={showTags} />)
           : null}
       </div>
     </>

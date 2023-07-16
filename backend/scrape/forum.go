@@ -246,7 +246,7 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 	// there are instances where there are two or more labels stacked on top of
 	// each other: such as one line containing "I" and annother line containing
 	// "(insert date)" for a specific AIME.
-	append_label := false
+	previous_label := false
 	// make sure we're not dealing with Solutions
 	solution_re := regexp.MustCompile(`[Ss]olution`)
 	if solution_re.Match([]byte(resp.Response.Category.Name)) {
@@ -260,14 +260,13 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 		// Straight-up when not a post
 		notpost := strings.ToLower(p.Type) != "post"
 		if label {
-			if append_label {
-				front_label = front_label + " " + p.PostData.Rendered
-			} else {
+			// only take the first label that comes in. redundant afterwards.
+			if !previous_label {
 				front_label = p.PostData.Rendered
 			}
-			append_label = true
+			previous_label = true
 		} else {
-			append_label = false
+			previous_label = false
 		}
 		if announcement || label || notpost {
 			continue

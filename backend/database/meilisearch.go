@@ -44,7 +44,11 @@ func calculateSynonyms() map[string][]string {
 		"sl":            {"shortlist"},
 		"shortlist":     {"sl"},
 
+		"tst":                 {"team selection test"},
+		"team selection test": {"tst"},
+
 		"bmo":              {"balkan mo"},
+		"bamo":             {"bay-area-mathematical-olympiad"},
 		"rmm":              {"romanian masters"},
 		"hmmt":             {"Harvard-MIT-Mathematics-Tournament"},
 		"hmnt":             {"Harvard-MIT-Mathematics-Tournament-November"},
@@ -148,7 +152,10 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 
 func (c *MeiliSearchClient) Search(query string) (string, error) {
 	result, err := c.index.Search(query, &meilisearch.SearchRequest{
-		Limit: 20,
+		Limit:                 20,
+		AttributesToHighlight: []string{"source", "categories"},
+		HighlightPreTag:       "<span class=\"highlight\">",
+		HighlightPostTag:      "</span>",
 	})
 	if err != nil {
 		return "[]", err

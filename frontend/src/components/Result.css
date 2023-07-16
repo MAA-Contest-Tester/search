@@ -2,3 +2,6 @@
   position: absolute;
   top: 0;
 }
+.highlight {
+  @apply bg-blue-200 print:bg-transparent
+}

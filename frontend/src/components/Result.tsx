@@ -57,6 +57,8 @@ export default function Result(props: {
   solution?: string;
   url?: string;
   source?: string;
+  categories?: string;
+  showtags: boolean;
 }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -79,8 +81,7 @@ export default function Result(props: {
         (!visible ? " print:hidden" : "")
       }
     >
-      <a href={props.url} target="_blank" className="mx-3 font-bold text-base">
-        {props.source?.replace(new RegExp("Problems Problem"), "Problem")}
+      <a href={props.url} target="_blank" className="mx-3 font-bold text-base" dangerouslySetInnerHTML={{__html:props.source!}}>
       </a>
       <div className="flex flex-wrap flex-row justify-between items-center print:hidden">
         <a
@@ -115,6 +116,17 @@ export default function Result(props: {
       >
         {preprocessed}
       </div>
+      {props.showtags ?
+      <>
+      <hr className="print:hidden"/>
+      <div
+        className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text print:hidden"
+      >
+        <strong>Tags: {" "}</strong>
+        <span dangerouslySetInnerHTML={{__html: props.categories!}}/>
+      </div>
+      </>
+      : null}
     </div>
   );
 }
