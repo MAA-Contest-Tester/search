@@ -46,13 +46,14 @@ func calculateSynonyms() map[string][]string {
 
 		"bmo":              {"balkan mo"},
 		"rmm":              {"romanian masters"},
-		"hmmt":             {"Harvard MIT Mathematics"},
-		"smt":              {"Stanford Mathematics Tournament"},
-		"bmt":              {"berkeley math tournament"},
-		"pumac":            {"Princeton University Math"},
+		"hmmt":             {"Harvard-MIT-Mathematics-Tournament"},
+		"hmnt":             {"Harvard-MIT-Mathematics-Tournament-November"},
+		"smt":              {"stanford-mathematics-tournament"},
+		"bmt":              {"berkeley-math-tournament"},
+		"pumac":            {"princeton-university-math-competition"},
 		"jmo":              {"usajmo"},
 		"amo":              {"usamo"},
-		"mpfg":             {"math prize girls"},
+		"mpfg":             {"math-prize-for-girls"},
 		"math prize girls": {"mpfg"},
 
 		"geo":   {"geometry"},
@@ -62,7 +63,7 @@ func calculateSynonyms() map[string][]string {
 		"fe":    {"functional equation"},
 	}
 	// A1 => Algebra 1, G8 => Geometry 8, ...
-	categories := map[string]string{"a": "algebra", "g": "geometry", "n": "nt", "c": "combinatorics"}
+	categories := map[string]string{"a": "algebra", "g": "geometry", "n": "number-theory", "c": "combinatorics"}
 	for key, value := range categories {
 		for i := 1; i < 12; i++ {
 			short := fmt.Sprintf("%v%v", key, i)

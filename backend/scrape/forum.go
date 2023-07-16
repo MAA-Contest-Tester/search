@@ -168,8 +168,16 @@ type CategoryResponse struct {
 
 // function to clean out some of the BS people perform on C&P titles
 func ProcessProblemSource(s string) string {
-	// get rid of the random dashes people put on C&P titles
-	s = strings.ReplaceAll(s, "-", " ")
+	// get rid of any non-alphanumeric characters.
+	filtered := make([]rune, 0)
+	for _, c := range []rune(s) {
+		if c == '-' {
+			filtered = append(filtered, ' ')
+		} else if '0' <= c && c <= '9' || 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || c == ' ' {
+			filtered = append(filtered, c)
+		}
+	}
+	s = string(filtered)
 	// fix 2017 IMO ShortiIst
 	shortiIstregex := regexp.MustCompile(`Short[iI][iI]st`)
 	s = shortiIstregex.ReplaceAllString(s, "Shortlist")
@@ -178,7 +186,18 @@ func ProcessProblemSource(s string) string {
 	s = problemsRegex.ReplaceAllString(s, " ")
 	islRegex := regexp.MustCompile(`ISL`)
 	s = islRegex.ReplaceAllString(s, "IMO Shortlist")
-	return s
+	return string(filtered)
+}
+
+/*
+Helper function that eliminates completely useless HTML tags in titles and whatnot.
+*/
+func RemoveHtmlBS(s string) string {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(s))
+	if err != nil {
+		logger.Fatal(err)
+	}
+	return doc.Text()
 }
 
 // disqualify tags that represent contests because they pollute search results.
@@ -222,7 +241,12 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 	}
 	items := resp.Response.Category.Items
 	problems := make([]Topic, 0)
+
 	front_label := ""
+	// there are instances where there are two or more labels stacked on top of
+	// each other: such as one line containing "I" and annother line containing
+	// "(insert date)" for a specific AIME.
+	append_label := false
 	// make sure we're not dealing with Solutions
 	solution_re := regexp.MustCompile(`[Ss]olution`)
 	if solution_re.Match([]byte(resp.Response.Category.Name)) {
@@ -236,20 +260,27 @@ func (resp *CategoryResponse) ToProblems(f *ForumSession) []Problem {
 		// Straight-up when not a post
 		notpost := strings.ToLower(p.Type) != "post"
 		if label {
-			front_label = p.PostData.Rendered
+			if append_label {
+				front_label = front_label + " " + p.PostData.Rendered
+			} else {
+				front_label = p.PostData.Rendered
+			}
+			append_label = true
+		} else {
+			append_label = false
 		}
 		if announcement || label || notpost {
 			continue
 		}
 		problem := Problem{
-			Source: fmt.Sprintf(
+			Source: RemoveHtmlBS(fmt.Sprintf(
 				"%v %v Problem %v",
 				// e.g. "2023 USAMO"
 				ProcessProblemSource(resp.Response.Category.Name),
 				// e.g. "Day 2"
 				front_label,
 				p.Title,
-			),
+			)),
 			Statement: p.PostData.Canonical,
 			Rendered:  p.PostData.Rendered,
 			Url: fmt.Sprintf(
