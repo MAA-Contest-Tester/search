@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{.Title}}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html {
+          font-family: sans-serif;
+        }
+        body {
+          justify-content: center;
+          display: flex;
+        }
+        .outside {
+          margin: 0em;
+          padding: 0em;
+          justify-content: center;
+          width: clamp(10%,700px,100%);
+        }
+        h1 {
+          font-size: 25px;
+        }
+        h2 {
+          font-size: 15px;
+        }
+        p {
+          font-size: 14px;
+        }
+        a {
+          text-decoration-line: underline;
+          text-decoration-color: #1e40af;
+          color:black;
+        }
+        a:hover{
+          color: #1e40af;
+        }
+        .rendered {
+          display: block;
+          margin: 1em;
+          padding-left: 1em;
+          padding-right: 1em;
+          padding-top: 0.5em;
+          padding-bottom: 0.5em;
+
+          border-top-width: 1px;
+          border-right-width: 1px;
+          border-bottom-width: 1px;
+          border-left-width: 1px;
+
+          border-color: rgb(229 231 235);
+          border-style: solid;
+          border-radius: 10px;
+        }
+
+        /* AoPS LaTeX attributes */
+        .latexcenter {
+          display: block;
+          margin: 10px;
+        }
+        .latex {
+          display: inline-block;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="outside">
+      <div style="margin:1em; text-align: center;">
+        <h1>{{.Title}}</h1>
+        <p>
+        {{with .Author}}
+        <strong>By {{.}}</strong>
+        {{else}}
+          <strong>
+            Created with <span style="color: rgb(30 64 175);">Search.</span>MAATester.com
+          </strong>
+        {{end}}
+        </p>
+      </div>
+      {{ range .Problems}}
+      <div class="rendered">
+        <h2><a href="{{.Solution}}" target="_blank">{{.Source}}</a></h2>
+        <p>
+        {{.Rendered}}
+        </p>
+      </div>
+      {{end}}
+    </div>
+  </body>
+</html>

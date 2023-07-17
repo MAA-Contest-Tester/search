@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"log"
+	"math"
 	"os"
 	"regexp"
 
@@ -10,6 +11,12 @@ import (
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/google/uuid"
 )
+
+func problemScore(p scrape.Problem) float32 {
+	// contests before this year should be penalized
+	THRESHOLD := 2010.0
+	return float32(1.0 / (1.0 + 0.1*math.Exp(THRESHOLD-ExtractYear(p))))
+}
 
 type RedisClient struct {
 	client *redisearch.Client
@@ -56,6 +63,7 @@ func (c *RedisClient) AddProblems(problems []scrape.Problem) {
 		doc := redisearch.NewDocument(uuid.NewString(), problemScore(p))
 		doc.Set("url", p.Url).
 			Set("statement", p.Statement).
+			Set("statement", p.Statement).
 			Set("solution", p.Solution).
 			Set("source", p.Source).
 			Set("categories", p.Categories)
@@ -81,4 +89,16 @@ func (c *RedisClient) Search(query string) (string, error) {
 		log.Fatal(err)
 	}
 	return string(out), nil
+}
+
+func (c *RedisClient) GetById(id string) (string, error) {
+	p, err := c.client.Get(id)
+	if err != nil {
+		return "{}", err
+	}
+	serialized, err := json.Marshal(p)
+	if err != nil {
+		return "{}", err
+	}
+	return string(serialized), nil
 }

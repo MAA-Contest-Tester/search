@@ -2,10 +2,10 @@ package database
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 
 	"github.com/MAA-Contest-Tester/search/backend/scrape"
 	"github.com/meilisearch/meilisearch-go"
@@ -83,21 +83,6 @@ func calculateSynonyms() map[string][]string {
 	return synonyms
 }
 
-func SourceToId(source string) string {
-	source = strings.ToLower(source)
-	runes := []rune(source)
-	res := []rune{}
-	for _, r := range runes {
-		switch {
-		case ('0' <= r && r <= '9') || 'a' <= r && r <= 'z':
-			res = append(res, r)
-		case r == ' ':
-			res = append(res, rune('-'))
-		}
-	}
-	return string(res)
-}
-
 func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 	docs := make([]map[string]interface{}, 0)
 	order := []string{"source", "categories", "statement"}
@@ -116,7 +101,7 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 		StopWords: []string{
 			"a", "is", "the", "an", "and", "as", "at", "be", "but", "by",
 			"into", "it", "not", "of", "on", "or", "their",
-			"there", "these", "they", "this", "to", "was", "will",
+			"there", "these", "they", "this", "to", "was", "will", "for",
 		},
 	}
 	c.index.UpdateSettings(&settings)
@@ -143,7 +128,7 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 		// TODO: set doc[id] to a urlized version of the source.
 
 		doc["id"] = SourceToId(doc["source"].(string))
-		doc["year"] = extractYear(p)
+		doc["year"] = ExtractYear(p)
 
 		docs = append(docs, doc)
 	}
@@ -166,4 +151,14 @@ func (c *MeiliSearchClient) Search(query string) (string, error) {
 	}
 	out, _ := json.Marshal(result.Hits)
 	return string(out), nil
+}
+
+func (c *MeiliSearchClient) GetById(id string) (string, error) {
+	var p map[string]interface{}
+	message := c.index.GetDocument(id, &meilisearch.DocumentQuery{}, &p)
+	if message != nil {
+		return "{}", errors.New("404 Not Found")
+	}
+	text, _ := json.Marshal(&p)
+	return string(text), nil
 }

@@ -171,7 +171,7 @@ func ProcessProblemSource(s string) string {
 	// get rid of any non-alphanumeric characters.
 	filtered := make([]rune, 0)
 	for _, c := range []rune(s) {
-		if c == '-' {
+		if c == '-' || c == '/' {
 			filtered = append(filtered, ' ')
 		} else if '0' <= c && c <= '9' || 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || c == ' ' {
 			filtered = append(filtered, c)
