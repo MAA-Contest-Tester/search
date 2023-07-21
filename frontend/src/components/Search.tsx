@@ -11,6 +11,8 @@ export default function Search() {
   const [loading, setLoading] = useState<boolean>(false);
   // indicates whether currently paginating or not.
   const [pageLoading, setPageLoading] = useState<boolean>(false);
+  // status for whether pagination returns no more results.
+  const [nothing, setNothing] = useState<boolean>(false);
 
   const apicall = () => {
     fetch(`/search?query=${encodeURI(query)}`)
@@ -42,6 +44,9 @@ export default function Search() {
         } else {
           setError(null);
           data.json().then((json: any[]) => {
+            if (json.length === 0) {
+              setNothing(true)
+            }
             setResults(results.concat(json.map(x => x["_formatted"])));
           });
         }
@@ -51,6 +56,7 @@ export default function Search() {
       });
   };
   useEffect(() => {
+    setNothing(false)
     setLoading(true);
     const debounced_api = setTimeout(() => apicall(), 200);
     return () => clearTimeout(debounced_api);
@@ -118,6 +124,7 @@ export default function Search() {
           ? results.map((el, i) => <Result key={i} {...el} showtags={showTags} />)
           : null}
       </div>
+      {!nothing ?
       <div className="text-center">
         <button
           className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200 text-sm"
@@ -127,6 +134,7 @@ export default function Search() {
         </button>
         {pageLoading ? <p className="text-black my-2 font-bold">Loading...</p> : null}
       </div>
+      : null}
     </>
   );
 }
