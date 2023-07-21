@@ -2,7 +2,7 @@ import "katex/dist/katex.min.css";
 import renderMathInElement from "katex/dist/contrib/auto-render";
 import "./Result.css";
 import { useContext, useEffect, useRef } from "react";
-import {HandoutIdsContext} from "./HandoutGenerator"
+import { HandoutIdsContext } from "./HandoutGenerator";
 
 const delimiters = [
   { left: "$$", right: "$$", display: true },
@@ -54,13 +54,16 @@ const preprocess = (s: string | undefined) => {
 };
 
 export default function Result(props: {
-  statement?: string;
-  solution?: string;
-  url?: string;
-  source?: string;
-  categories?: string;
-  id: string;
+  data: {
+    statement?: string;
+    solution?: string;
+    url?: string;
+    source?: string;
+    categories?: string;
+    id: string;
+  } | null;
   showtags: boolean;
+  handout?: boolean;
 }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -74,50 +77,69 @@ export default function Result(props: {
       });
     }
   });
-  const {idText, setIdText} = useContext(HandoutIdsContext);
-  const preprocessed = preprocess(props.statement);
+  const { idText, setIdText } = useContext(HandoutIdsContext);
+  const preprocessed = preprocess(props.data?.statement);
   return (
     <div
       className={
         "my-2 p-3 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full"
       }
     >
-      <a
-        href={props.url}
-        target="_blank"
-        className="mx-3 font-bold text-base"
-        dangerouslySetInnerHTML={{ __html: props.source! }}
-      ></a>
-      <div className="flex flex-wrap flex-row justify-between items-center print:hidden">
-        <a
-          href={props.solution}
-          target="_blank"
-          className="mx-3 font-bold text-base"
-        >
-          See Discussion
-        </a>
-        <div className="flex flex-wrap flex-row justify-left items-center print:hidden">
-          <button
-            onClick={(_) => setIdText(idText + (idText.trim().length != 0 ? "\n" : "") + props.id)}
-            className="mx-3 font-bold text-sm hover:bg-blue-800 hover:text-white p-[5px] border-gray-200 rounded-lg border duration-200"
-          >
-            Add to Handout
-          </button>
-        </div>
-      </div>
-      <div
-        ref={ref}
-        className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text"
-      >
-        {preprocessed}
-      </div>
-      {props.showtags ? (
+      {props.data !== null ? (
         <>
-          <hr className="print:hidden" />
-          <div className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text print:hidden">
-            <strong>Tags: </strong>
-            <span dangerouslySetInnerHTML={{ __html: props.categories! }} />
+          <a
+            href={props.data.url}
+            target="_blank"
+            className="mx-3 font-bold text-base"
+            dangerouslySetInnerHTML={{ __html: props.data.source! }}
+          ></a>
+          <div className="flex flex-wrap flex-row justify-between items-center print:hidden">
+            <a
+              href={props.data.solution}
+              target="_blank"
+              className="mx-3 font-bold text-base"
+            >
+              See Discussion
+            </a>
+            {props.handout ? null :
+            <div className="flex flex-wrap flex-row justify-left items-center print:hidden">
+              <button
+                onClick={(_) =>
+                  setIdText(
+                    idText +
+                      (idText.trim().length != 0 ? "\n" : "") +
+                      props.data?.id
+                  )
+                }
+                className="mx-3 font-bold text-sm hover:bg-blue-800 hover:text-white p-[5px] border-gray-200 rounded-lg border duration-200"
+              >
+                Add to Handout
+              </button>
+            </div>}
           </div>
+        </>
+      ) : (
+        <h2 className="mx-3 font-bold text-base">404 Not Found</h2>
+      )}
+      {props.data !== null ? (
+        <>
+          <div
+            ref={ref}
+            className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text"
+          >
+            {preprocessed}
+          </div>
+          {props.showtags ? (
+            <>
+              <hr className="print:hidden" />
+              <div className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text print:hidden">
+                <strong>Tags: </strong>
+                <span
+                  dangerouslySetInnerHTML={{ __html: props.data.categories! }}
+                />
+              </div>
+            </>
+          ) : null}
         </>
       ) : null}
     </div>

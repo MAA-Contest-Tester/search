@@ -115,7 +115,7 @@ export default function Search() {
           </strong>{" "}
         </div>
         {results.length
-          ? results.map((el, i) => <Result key={i} {...el} showtags={showTags} />)
+          ? results.map((el, i) => <Result key={i} data={el} showtags={showTags} />)
           : null}
       </div>
       {(!nothing && results.length > 0) ?

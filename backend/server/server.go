@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"text/template"
+	"strings"
 
 	"github.com/MAA-Contest-Tester/search/backend/database"
 	"github.com/MAA-Contest-Tester/search/backend/scrape"
@@ -37,44 +37,29 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type handoutData struct {
-	Title    string
-	Author   string
-	Description    string
-	Problems []*scrape.Problem
+type handoutRequest struct {
+	ProblemIds []string `json:"ids"`
 }
 
-//go:embed templates/handout.html
-var handout_template string
-
 func handoutHandler(w http.ResponseWriter, r *http.Request) {
-	// temporary
-	tmpl, err := template.New("single").Parse(handout_template)
-	if err != nil {
-		panic(err)
-	}
-
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Add("Content-Type", "text/plain")
-		io.WriteString(w, fmt.Sprintf("Invalid Request Method %v", r.Method))
+	if strings.ToLower(r.Header.Get("Content-Type")) != "application/json" {
+		msg := "Content-Type header is not application/json"
+		http.Error(w, msg, http.StatusUnsupportedMediaType)
 		return
+    }
+	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
+	dec := json.NewDecoder(r.Body)
+    dec.DisallowUnknownFields()
+	request := handoutRequest{}
+	err := dec.Decode(&request);
+	if err != nil {
+		http.Error(w, fmt.Sprint(err), http.StatusBadRequest)
 	}
-	r.ParseForm()
-	params := r.Form
-	ids := params["id"]
-	title := params.Get("title")
-	author := params.Get("author")
-	description := params.Get("description")
-	problems := make([]*scrape.Problem, len(ids))
-	w.Header().Add("Content-Type", "text/html")
-	for index, id := range ids {
+	problems := make([]*scrape.Problem, len(request.ProblemIds))
+	for index, id := range request.ProblemIds {
 		res, err := client.GetById(id)
 		if err != nil {
-			problems[index] = &scrape.Problem{
-				Source:   "404 Not Found",
-				Rendered: template.HTMLEscapeString(title),
-			}
+			problems[index] = nil 
 		} else {
 			err := json.Unmarshal([]byte(res), &problems[index])
 			if err != nil {
@@ -82,15 +67,12 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	err = tmpl.Execute(w, &handoutData{
-		Title:    template.HTMLEscapeString(title),
-		Author:   template.HTMLEscapeString(author),
-		Description:   template.HTMLEscapeString(description),
-		Problems: problems,
-	})
+	encoded, err := json.Marshal(problems);
 	if err != nil {
 		panic(err)
 	}
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(encoded)
 }
 
 func InitServer(path *string) *http.ServeMux {

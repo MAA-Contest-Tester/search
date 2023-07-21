@@ -1,17 +1,20 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import Result from "./Result";
 
 export const HandoutIdsContext = createContext<{
   idText: string;
   setIdText: any;
-}>({idText: "", setIdText:null});
+}>({ idText: "", setIdText: null });
 
-export function HandoutProvider(props:{children:React.ReactNode}) {
+export function HandoutProvider(props: { children: React.ReactNode }) {
   const [idText, setIdText] = useState<string>(
-    (localStorage.getItem("handout_ids") || "")
+    localStorage.getItem("handout_ids") || ""
   );
-  return <HandoutIdsContext.Provider value={{idText, setIdText}}>
-    {props.children}
-  </HandoutIdsContext.Provider>
+  return (
+    <HandoutIdsContext.Provider value={{ idText, setIdText }}>
+      {props.children}
+    </HandoutIdsContext.Provider>
+  );
 }
 
 export function HandoutGenerator() {
@@ -24,23 +27,50 @@ export function HandoutGenerator() {
   const [desc, setDesc] = useState<string>(
     localStorage.getItem("handout_desc") || ""
   );
-  const {idText, setIdText} = useContext(HandoutIdsContext);
-  const [ids, setIds] = useState<string[]>([])
+  const { idText, setIdText } = useContext(HandoutIdsContext);
+  const [ids, setIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<any | null>(null);
+  const [problems, setProblems] = useState<any[]>([]);
   useEffect(() => {
     localStorage.setItem("handout_ids", idText);
     setIds(idText.trim().split(/\s+/));
-  }, [idText])
+  }, [idText]);
+  useEffect(() => {
+    if (ids.length == 0 || ids[0] === "") {
+      setProblems([]);
+      return;
+    }
+    setLoading(true);
+    fetch(`/backend/handout`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({ ids: ids }),
+    })
+      .then(async (data) => {
+        setLoading(false);
+        if (data.status != 200) {
+          setProblems([]);
+          setError(await data.text());
+        } else {
+          setError(null);
+          data.json().then((json: any[]) => {
+            setProblems(json);
+          });
+        }
+      })
+      .catch((_) => {
+        setError(error);
+      });
+  }, [ids]);
   return (
-    <form
-      className="my-2 p-1 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full print:hidden"
-      method="POST"
-      action="/backend/handout"
-    >
-      <h2
-        className="w-full font-bold text-lg rounded-sm duration-200 p-[5px] flex justify-between"
-      >
-        Handout Generator
-      </h2>
+    <>
+      <div className="my-2 p-1 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full print:hidden">
+        <h2 className="w-full font-bold text-lg rounded-sm duration-200 p-[5px] flex justify-between">
+          Handout Generator
+        </h2>
         <>
           <div className="flex flex-row flex-wrap justify-between">
             <input
@@ -69,10 +99,9 @@ export function HandoutGenerator() {
             />
             <button
               className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200 text-sm"
-              type="submit"
-              value="submit"
+              onClick={() => window.print()}
             >
-              Generate
+              Print
             </button>
           </div>
           <textarea
@@ -99,6 +128,34 @@ export function HandoutGenerator() {
             <input name="id" value={id} type="hidden" key={id} />
           ))}
         </>
-    </form>
+      </div>
+      <div className="print:hidden">
+        {loading ? (
+          <p className="text-black my-2 font-bold">Loading...</p>
+        ) : null}
+        {error ? <p className="text-red-600 my-2 font-bold">{error}</p> : null}
+      </div>
+      <hr className="my-2 print:hidden" />
+      {title && (
+        <h2 className="w-full font-bold text-2xl rounded-sm duration-200 p-[5px] text-center">
+          {title}
+        </h2>
+      )}
+      {author && (
+        <p className="w-full text-sm rounded-sm duration-200 p-[5px] text-center">
+          {author}
+        </p>
+      )}
+      {desc && (
+        <p className="w-full text-sm rounded-sm duration-200 p-[5px] text-left">
+          {desc}
+        </p>
+      )}
+      {problems.length
+        ? problems.map((el, i) => (
+            <Result key={i} data={el} showtags={false} handout />
+          ))
+        : null}
+    </>
   );
 }
