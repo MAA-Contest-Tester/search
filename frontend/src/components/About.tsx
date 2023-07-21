@@ -2,8 +2,9 @@ export default function About() {
   return (
     <div className="my-3 mx-0 text-sm print:hidden">
       <p>
-        An instant search engine for math olympiad questions. Problems sourced
-        from the AoPS Community.
+        An instant search engine for math olympiad questions. 
+        Over <strong>17000</strong> Problems.
+        Problems sourced from the Art of Problem Solving Community.
       </p>
       <p>
         {" "}
@@ -18,8 +19,6 @@ export default function About() {
         .
       </p>
       <p className="mt-3">
-        Over <strong>17000</strong> Problems. <strong>Instant Handouts</strong>{" "}
-        with printer friendliness.
       </p>
     </div>
   );

@@ -33,9 +33,9 @@ export function HandoutGenerator() {
   }, [idText])
   return (
     <form
-      className="my-2 p-2 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full"
+      className="my-2 p-1 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full"
       method="POST"
-      action="/handout"
+      action="/backend/handout"
     >
       <h2
         className="w-full font-bold text-md rounded-sm duration-200 p-[5px] flex justify-between cursor-pointer"
@@ -56,7 +56,7 @@ export function HandoutGenerator() {
                 localStorage.setItem("handout_title", e.target.value);
                 setTitle(e.target.value);
               }}
-              className="rounded-md m-1 block text-sm"
+              className="rounded-md block text-sm my-1"
             />
             <input
               type="text"
@@ -68,7 +68,7 @@ export function HandoutGenerator() {
                 localStorage.setItem("handout_author", e.target.value);
                 setAuthor(e.target.value);
               }}
-              className="rounded-md m-1 block text-sm"
+              className="rounded-md block text-sm my-1"
             />
             <button
               className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200 text-sm"

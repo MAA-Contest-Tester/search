@@ -102,7 +102,7 @@ func InitServer(path *string) *http.ServeMux {
 	} else {
 		mux.HandleFunc("/", indexHandler)
 	}
-	mux.HandleFunc("/search", searchHandler)
-	mux.HandleFunc("/handout", handoutHandler)
+	mux.HandleFunc("/backend/search", searchHandler)
+	mux.HandleFunc("/backend/handout", handoutHandler)
 	return mux
 }

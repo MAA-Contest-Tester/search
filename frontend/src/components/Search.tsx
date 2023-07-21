@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import {HandoutGenerator} from "./HandoutGenerator";
 import Result from "./Result";
 
 export default function Search() {
@@ -16,7 +15,7 @@ export default function Search() {
   const [nothing, setNothing] = useState<boolean>(false);
   
   const apicall = () => {
-    fetch(`/search?query=${encodeURI(query)}`)
+    fetch(`/backend/search?query=${encodeURI(query)}`)
       .then(async (data) => {
         setLoading(false);
         if (data.status != 200) {
@@ -36,7 +35,7 @@ export default function Search() {
   const nextpage = () => {
     setPageLoading(true);
     const offset = results.length
-    fetch(`/search?query=${encodeURI(query)}&offset=${offset}`)
+    fetch(`/backend/search?query=${encodeURI(query)}&offset=${offset}`)
       .then(async (data) => {
         setPageLoading(false);
         if (data.status != 200) {
