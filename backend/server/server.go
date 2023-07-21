@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"github.com/MAA-Contest-Tester/search/backend/database"
@@ -20,9 +21,11 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("query")
+	o := r.URL.Query().Get("offset")
+	offset, _ := strconv.Atoi(o)
 	w.Header().Add("Content-Type", "application/json")
 	if q != "" {
-		res, err := client.Search(q)
+		res, err := client.Search(q, offset)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			io.WriteString(w, fmt.Sprint(err))

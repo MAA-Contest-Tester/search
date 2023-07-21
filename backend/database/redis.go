@@ -74,7 +74,7 @@ func (c *RedisClient) AddProblems(problems []scrape.Problem) {
 	}
 }
 
-func (c *RedisClient) Search(query string) (string, error) {
+func (c *RedisClient) Search(query string, offset int) (string, error) {
 	q := redisearch.NewQuery(query)
 	docs, _, error := c.client.Search(q.Limit(0, 20))
 	if error != nil {

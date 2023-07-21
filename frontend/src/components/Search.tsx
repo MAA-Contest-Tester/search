@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import Result from "./Result";
-import { debounce } from "debounce";
-
 
 export default function Search() {
   const [query, setQuery] = useState("");
   const [error, setError] = useState<any | null>(null);
   const [results, setResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const [showTags, setShowTags] = useState<boolean>(false);
+
+  // indicates whether query has changed.
+  const [loading, setLoading] = useState<boolean>(false);
+  // indicates whether currently paginating or not.
+  const [pageLoading, setPageLoading] = useState<boolean>(false);
+
   const apicall = () => {
-    setLoading(true);
     fetch(`/search?query=${encodeURI(query)}`)
       .then(async (data) => {
         setLoading(false);
@@ -28,7 +30,28 @@ export default function Search() {
         setError(error);
       });
   };
+  const nextpage = () => {
+    setPageLoading(true);
+    const offset = results.length
+    fetch(`/search?query=${encodeURI(query)}&offset=${offset}`)
+      .then(async (data) => {
+        setPageLoading(false);
+        if (data.status != 200) {
+          setResults([]);
+          setError(await data.text());
+        } else {
+          setError(null);
+          data.json().then((json: any[]) => {
+            setResults(results.concat(json.map(x => x["_formatted"])));
+          });
+        }
+      })
+      .catch((_) => {
+        setError(error);
+      });
+  };
   useEffect(() => {
+    setLoading(true);
     const debounced_api = setTimeout(() => apicall(), 200);
     return () => clearTimeout(debounced_api);
   }, [query]);
@@ -43,7 +66,7 @@ export default function Search() {
   );
   return (
     <>
-      <div className="print:hidden">
+      <div className="print:hidden text-sm">
       Try searching for keywords (e.g. {queryExample("moving points")} or
       {" "}{queryExample("inequality")}). You could also search for problems from a
       specific year or contest ({queryExample("2022 ISL G8")}). Some common
@@ -54,6 +77,7 @@ export default function Search() {
           <input
             type="text"
             value={query}
+            readOnly={pageLoading}
             placeholder="Raw Query"
             onChange={(e) => {
               e.preventDefault();
@@ -93,6 +117,15 @@ export default function Search() {
         {results.length
           ? results.map((el, i) => <Result key={i} {...el} showtags={showTags} />)
           : null}
+      </div>
+      <div className="text-center">
+        <button
+          className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200 text-sm"
+          onClick={() => {if (!loading) nextpage()}}
+        >
+          Next Page
+        </button>
+        {pageLoading ? <p className="text-black my-2 font-bold">Loading...</p> : null}
       </div>
     </>
   );

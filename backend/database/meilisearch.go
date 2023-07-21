@@ -139,12 +139,13 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 	logger.Println("Task", task.TaskUID)
 }
 
-func (c *MeiliSearchClient) Search(query string) (string, error) {
+func (c *MeiliSearchClient) Search(query string, offset int) (string, error) {
 	result, err := c.index.Search(query, &meilisearch.SearchRequest{
 		Limit:                 20,
 		AttributesToHighlight: []string{"source", "categories"},
 		HighlightPreTag:       "<span class=\"highlight\">",
 		HighlightPostTag:      "</span>",
+		Offset: int64(offset),
 	})
 	if err != nil {
 		return "[]", err
