@@ -58,6 +58,7 @@ export default function Result(props: {
   url?: string;
   source?: string;
   categories?: string;
+  id: string;
   showtags: boolean;
 }) {
   const ref = useRef(null);
@@ -73,16 +74,18 @@ export default function Result(props: {
     }
   });
   const preprocessed = preprocess(props.statement);
-  const [visible, setVisible] = useState(false);
   return (
     <div
       className={
-        "my-2 p-3 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full" +
-        (!visible ? " print:hidden" : "")
+        "my-2 p-3 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full"
       }
     >
-      <a href={props.url} target="_blank" className="mx-3 font-bold text-base" dangerouslySetInnerHTML={{__html:props.source!}}>
-      </a>
+      <a
+        href={props.url}
+        target="_blank"
+        className="mx-3 font-bold text-base"
+        dangerouslySetInnerHTML={{ __html: props.source! }}
+      ></a>
       <div className="flex flex-wrap flex-row justify-between items-center print:hidden">
         <a
           href={props.solution}
@@ -93,21 +96,11 @@ export default function Result(props: {
         </a>
         <div className="flex flex-wrap flex-row justify-left items-center print:hidden">
           <button
-            onClick={(_) => navigator.clipboard.writeText(preprocessed)}
+            onClick={(_) => navigator.clipboard.writeText(props.id)}
             className="mx-3 font-bold text-base hover:bg-blue-800 hover:text-white p-[2px] border-gray-200 rounded-lg border duration-200"
           >
-            Copy
+            Copy ID
           </button>
-          <div className="items-center flex">
-            <span className="mx-1 text-sm">Print</span>
-            <input
-              type="checkbox"
-              className="rounded-sm"
-              alt="Include when printing?"
-              checked={visible}
-              onChange={() => setVisible(!visible)}
-            />
-          </div>
         </div>
       </div>
       <div
@@ -116,17 +109,15 @@ export default function Result(props: {
       >
         {preprocessed}
       </div>
-      {props.showtags ?
-      <>
-      <hr className="print:hidden"/>
-      <div
-        className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text print:hidden"
-      >
-        <strong>Tags: {" "}</strong>
-        <span dangerouslySetInnerHTML={{__html: props.categories!}}/>
-      </div>
-      </>
-      : null}
+      {props.showtags ? (
+        <>
+          <hr className="print:hidden" />
+          <div className="whitespace-pre-wrap w-full overflow-y-hidden overflow-x-auto p-1 text-sm select-text print:hidden">
+            <strong>Tags: </strong>
+            <span dangerouslySetInnerHTML={{ __html: props.categories! }} />
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

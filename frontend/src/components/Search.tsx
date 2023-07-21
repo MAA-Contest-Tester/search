@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import HandoutGenerator from "./HandoutGenerator";
 import Result from "./Result";
 
 export default function Search() {
@@ -13,7 +14,7 @@ export default function Search() {
   const [pageLoading, setPageLoading] = useState<boolean>(false);
   // status for whether pagination returns no more results.
   const [nothing, setNothing] = useState<boolean>(false);
-
+  
   const apicall = () => {
     fetch(`/search?query=${encodeURI(query)}`)
       .then(async (data) => {
@@ -72,6 +73,7 @@ export default function Search() {
   );
   return (
     <>
+      <HandoutGenerator/>
       <div className="print:hidden text-sm">
       Try searching for keywords (e.g. {queryExample("moving points")} or
       {" "}{queryExample("inequality")}). You could also search for problems from a
@@ -91,14 +93,8 @@ export default function Search() {
             }}
             className="rounded-md my-1 block w-full"
           />
-          <button
-            className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200"
-            onClick={() => window.print()}
-          >
-            Print
-          </button>
           <div className="items-center flex">
-            <span className="mx-1 text-sm font-bold">Show Tags</span>
+            <span className="m-1 text-sm font-bold">Show Tags</span>
             <input
               type="checkbox"
               className="rounded-sm"
@@ -124,7 +120,7 @@ export default function Search() {
           ? results.map((el, i) => <Result key={i} {...el} showtags={showTags} />)
           : null}
       </div>
-      {!nothing ?
+      {(!nothing && results.length > 0) ?
       <div className="text-center">
         <button
           className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200 text-sm"

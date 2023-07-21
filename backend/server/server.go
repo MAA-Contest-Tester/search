@@ -39,8 +39,9 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 type handoutData struct {
 	Title    string
-	Problems []*scrape.Problem
 	Author   string
+	Description    string
+	Problems []*scrape.Problem
 }
 
 //go:embed templates/handout.html
@@ -53,11 +54,20 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	ids := r.URL.Query()["id"]
-	title := r.URL.Query().Get("title")
-	author := r.URL.Query().Get("author")
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Add("Content-Type", "text/plain")
+		io.WriteString(w, fmt.Sprintf("Invalid Request Method %v", r.Method))
+		return
+	}
+	r.ParseForm()
+	params := r.Form
+	ids := params["id"]
+	title := params.Get("title")
+	author := params.Get("author")
+	description := params.Get("description")
 	if len(title) == 0 {
-		title = "An Anonymous Handout"
+		title = "Title"
 	}
 	problems := make([]*scrape.Problem, len(ids))
 	w.Header().Add("Content-Type", "text/html")
@@ -78,6 +88,7 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.Execute(w, &handoutData{
 		Title:    template.HTMLEscapeString(title),
 		Author:   template.HTMLEscapeString(author),
+		Description:   template.HTMLEscapeString(description),
 		Problems: problems,
 	})
 	if err != nil {
