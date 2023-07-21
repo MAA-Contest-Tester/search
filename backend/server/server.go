@@ -66,9 +66,6 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 	title := params.Get("title")
 	author := params.Get("author")
 	description := params.Get("description")
-	if len(title) == 0 {
-		title = "Title"
-	}
 	problems := make([]*scrape.Problem, len(ids))
 	w.Header().Add("Content-Type", "text/html")
 	for index, id := range ids {

@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import About from "./components/About";
+import {HandoutGenerator, HandoutProvider} from "./components/HandoutGenerator";
 import Search from "./components/Search";
 import "./index.css";
 
@@ -13,7 +14,10 @@ function App() {
           <span>MAATester.com</span>
         </h1>
         <About />
-        <Search />
+        <HandoutProvider>
+          <HandoutGenerator/>
+          <Search />
+        </HandoutProvider>
       </main>
     </div>
   );

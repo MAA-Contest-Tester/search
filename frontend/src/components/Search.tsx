@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import HandoutGenerator from "./HandoutGenerator";
+import {HandoutGenerator} from "./HandoutGenerator";
 import Result from "./Result";
 
 export default function Search() {
@@ -73,7 +73,6 @@ export default function Search() {
   );
   return (
     <>
-      <HandoutGenerator/>
       <div className="print:hidden text-sm">
       Try searching for keywords (e.g. {queryExample("moving points")} or
       {" "}{queryExample("inequality")}). You could also search for problems from a

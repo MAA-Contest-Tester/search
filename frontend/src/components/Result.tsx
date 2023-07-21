@@ -1,7 +1,8 @@
 import "katex/dist/katex.min.css";
 import renderMathInElement from "katex/dist/contrib/auto-render";
 import "./Result.css";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
+import {HandoutIdsContext} from "./HandoutGenerator"
 
 const delimiters = [
   { left: "$$", right: "$$", display: true },
@@ -73,6 +74,7 @@ export default function Result(props: {
       });
     }
   });
+  const {idText, setIdText} = useContext(HandoutIdsContext);
   const preprocessed = preprocess(props.statement);
   return (
     <div
@@ -96,10 +98,10 @@ export default function Result(props: {
         </a>
         <div className="flex flex-wrap flex-row justify-left items-center print:hidden">
           <button
-            onClick={(_) => navigator.clipboard.writeText(props.id)}
+            onClick={(_) => setIdText(idText + (idText.trim().length != 0 ? "\n" : "") + props.id)}
             className="mx-3 font-bold text-base hover:bg-blue-800 hover:text-white p-[2px] border-gray-200 rounded-lg border duration-200"
           >
-            Copy ID
+            Add
           </button>
         </div>
       </div>

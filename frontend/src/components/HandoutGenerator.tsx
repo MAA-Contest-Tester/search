@@ -1,6 +1,20 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-export default function HandoutGenerator() {
+export const HandoutIdsContext = createContext<{
+  idText: string;
+  setIdText: any;
+}>({idText: "", setIdText:null});
+
+export function HandoutProvider(props:{children:React.ReactNode}) {
+  const [idText, setIdText] = useState<string>(
+    (localStorage.getItem("handout_ids") || "")
+  );
+  return <HandoutIdsContext.Provider value={{idText, setIdText}}>
+    {props.children}
+  </HandoutIdsContext.Provider>
+}
+
+export function HandoutGenerator() {
   const [title, setTitle] = useState<string>(
     localStorage.getItem("handout_title") || ""
   );
@@ -10,19 +24,23 @@ export default function HandoutGenerator() {
   const [desc, setDesc] = useState<string>(
     localStorage.getItem("handout_desc") || ""
   );
-  const [ids, setIds] = useState<string[]>(
-    (localStorage.getItem("handout_ids") || "").split(/\s+/)
-  );
   const [expanded, setExpanded] = useState<boolean>(false);
-  const update = (text: string) => {
-    localStorage.setItem("handout_ids", text);
-    text = text.trim()
-    setIds(text.split(/\s+/));
-  };
+  const {idText, setIdText} = useContext(HandoutIdsContext);
+  const [ids, setIds] = useState<string[]>([])
+  useEffect(() => {
+    localStorage.setItem("handout_ids", idText);
+    setIds(idText.trim().split(/\s+/));
+  }, [idText])
   return (
-    <form className="my-2 p-2 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full"
-    method="POST" action="/handout">
-      <h2 className="font-bold text-md hover:bg-blue-100 rounded-sm duration-200 p-[5px] flex justify-between" onClick={() => setExpanded(!expanded)}>
+    <form
+      className="my-2 p-2 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full"
+      method="POST"
+      action="/handout"
+    >
+      <h2
+        className="w-full font-bold text-md rounded-sm duration-200 p-[5px] flex justify-between cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
         <span>Handout Generator</span> <span>{expanded ? "-" : "+"}</span>
       </h2>
       {expanded ? (
@@ -54,7 +72,8 @@ export default function HandoutGenerator() {
             />
             <button
               className="my-1 p-2 hover:bg-blue-800 hover:text-white font-bold rounded-md duration-200 w-fit border border-gray-200 text-sm"
-              type="submit" value="submit"
+              type="submit"
+              value="submit"
             >
               Generate
             </button>
@@ -63,28 +82,25 @@ export default function HandoutGenerator() {
             rows={2}
             placeholder={"Handout Description."}
             name="description"
-            defaultValue={localStorage.getItem("handout_desc") || ""}
+            defaultValue={desc}
             onChange={(e) => {
               localStorage.setItem("handout_desc", e.target.value);
               setDesc(e.target.value);
             }}
             className="rounded-md my-1 block text-sm w-full"
           />
-          <div className="print:hidden text-sm">
-            Paste the IDs of handout problems below. Use the{" "}
-            <strong>Copy ID</strong> button for each problem. Separate each ID
-            with spaces or new lines.
-          </div>
           <textarea
             rows={5}
             placeholder={"Problem IDs go here."}
-            defaultValue={localStorage.getItem("handout_ids") || ""}
+            value={idText}
             onChange={(e) => {
-              update(e.target.value);
+              setIdText(e.target.value);
             }}
             className="rounded-md my-1 block text-sm w-full"
           />
-          {ids.map(id => <input name="id" value={id} type="hidden" key={id} />)}
+          {ids.map((id) => (
+            <input name="id" value={id} type="hidden" key={id} />
+          ))}
         </>
       ) : null}
     </form>
