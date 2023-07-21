@@ -4,23 +4,40 @@ import About from "./components/About";
 import {HandoutGenerator, HandoutProvider} from "./components/HandoutGenerator";
 import Search from "./components/Search";
 import "./index.css";
+import {
+  createBrowserRouter,
+  Route,
+  RouterProvider,
+  Routes,
+} from "react-router-dom";
+import Navbar from "./components/Navbar";
 
-function App() {
+const router = createBrowserRouter([
+  { path: "*", Component: Root },
+])
+
+function Root() {
   return (
     <div className="w-full min-h-screen p-2">
       <main className="clamp mx-auto">
+        <Navbar/>
         <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl print:hidden">
           <span className="text-blue-800">Search.</span>
           <span>MAATester.com</span>
         </h1>
-        <About />
         <HandoutProvider>
-          <HandoutGenerator/>
-          <Search />
+          <Routes>
+            <Route path="/" element={<><About/><Search/></>} />
+            <Route path="/handout" element={<HandoutGenerator />} />
+          </Routes>
         </HandoutProvider>
       </main>
     </div>
   );
+}
+
+function App() {
+  return <RouterProvider router={router} />;
 }
 
 if (import.meta.env.DEV) {

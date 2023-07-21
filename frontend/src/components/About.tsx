@@ -3,8 +3,8 @@ export default function About() {
     <div className="my-3 mx-0 text-sm print:hidden">
       <p>
         An instant search engine for math olympiad questions. 
-        Over <strong>17000</strong> Problems.
-        Problems sourced from the Art of Problem Solving Community.
+        Over <strong>17000</strong> problems
+        from the AoPS Community.
       </p>
       <p>
         {" "}

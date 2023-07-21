@@ -24,7 +24,6 @@ export function HandoutGenerator() {
   const [desc, setDesc] = useState<string>(
     localStorage.getItem("handout_desc") || ""
   );
-  const [expanded, setExpanded] = useState<boolean>(false);
   const {idText, setIdText} = useContext(HandoutIdsContext);
   const [ids, setIds] = useState<string[]>([])
   useEffect(() => {
@@ -33,17 +32,15 @@ export function HandoutGenerator() {
   }, [idText])
   return (
     <form
-      className="my-2 p-1 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full"
+      className="my-2 p-1 border-gray-200 border rounded-lg break-before-avoid-page break-inside-avoid-page break-after-avoid-page inline-block w-full print:hidden"
       method="POST"
       action="/backend/handout"
     >
       <h2
-        className="w-full font-bold text-md rounded-sm duration-200 p-[5px] flex justify-between cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
+        className="w-full font-bold text-lg rounded-sm duration-200 p-[5px] flex justify-between"
       >
-        <span>Handout Generator</span> <span>{expanded ? "-" : "+"}</span>
+        Handout Generator
       </h2>
-      {expanded ? (
         <>
           <div className="flex flex-row flex-wrap justify-between">
             <input
@@ -80,7 +77,7 @@ export function HandoutGenerator() {
           </div>
           <textarea
             rows={2}
-            placeholder={"Handout Description."}
+            placeholder={"Handout Description"}
             name="description"
             defaultValue={desc}
             onChange={(e) => {
@@ -91,7 +88,7 @@ export function HandoutGenerator() {
           />
           <textarea
             rows={5}
-            placeholder={"Problem IDs go here."}
+            placeholder={"Problem IDs go here"}
             value={idText}
             onChange={(e) => {
               setIdText(e.target.value);
@@ -102,7 +99,6 @@ export function HandoutGenerator() {
             <input name="id" value={id} type="hidden" key={id} />
           ))}
         </>
-      ) : null}
     </form>
   );
 }

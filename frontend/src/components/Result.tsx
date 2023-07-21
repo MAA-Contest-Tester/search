@@ -94,14 +94,14 @@ export default function Result(props: {
           target="_blank"
           className="mx-3 font-bold text-base"
         >
-          See Solution
+          See Discussion
         </a>
         <div className="flex flex-wrap flex-row justify-left items-center print:hidden">
           <button
             onClick={(_) => setIdText(idText + (idText.trim().length != 0 ? "\n" : "") + props.id)}
-            className="mx-3 font-bold text-base hover:bg-blue-800 hover:text-white p-[2px] border-gray-200 rounded-lg border duration-200"
+            className="mx-3 font-bold text-sm hover:bg-blue-800 hover:text-white p-[5px] border-gray-200 rounded-lg border duration-200"
           >
-            Add
+            Add to Handout
           </button>
         </div>
       </div>
