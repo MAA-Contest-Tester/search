@@ -80,7 +80,13 @@ func InitServer(path *string, meta *scrape.Meta) *http.ServeMux {
 	client = database.InitMeiliSearchClient()
 	if path != nil {
 		fileserver := http.FileServer(http.Dir(*path))
+		routes := []string{"/", "/meta", "/handout"}
 		mux.Handle("/", fileserver)
+		for _, route := range routes {
+			http.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, "index.html")
+			})
+		}
 	} else {
 		mux.HandleFunc("/", indexHandler)
 	}

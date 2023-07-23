@@ -16,3 +16,4 @@
 - [ ] Change site architecture and move to SSR (So that problems get
       pre-rendered)
     - [ ] Configure KaTeX so that it's not client-side dependent.
+- [ ] Write a discord client bot.
