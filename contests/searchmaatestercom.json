@@ -32,7 +32,7 @@
     {"name": "China 2nd Round", "id": 3288},
     {"name": "All-Russian Olympiad", "id": 3371}
   ],
-  "IMO Selection": [
+  "IMO Selection Tests": [
     {"name": "USA TSTST", "id": 3424},
     {"name": "USA TST", "id": 3411},
     {"name": "China TST", "id": 3282},

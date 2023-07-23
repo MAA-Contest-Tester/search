@@ -1,5 +1,7 @@
 package scrape
 
+import "time"
+
 type Problem struct {
 	Url        string `json:"url"`
 	Source     string `json:"source"`
@@ -20,7 +22,7 @@ type ContestList map[string][]Contest
 type Meta struct {
 	Contests     ContestList `json:"contestlist"`
 	ProblemCount int         `json:"problemcount"`
-	Date         string      `json:"date"`
+	Date         time.Time   `json:"date"`
 }
 
 type ScrapeResult struct {

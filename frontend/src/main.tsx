@@ -11,6 +11,7 @@ import {
   Routes,
 } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import Metadata from "./components/Metadata";
 
 const router = createBrowserRouter([
   { path: "*", Component: Root },
@@ -18,8 +19,9 @@ const router = createBrowserRouter([
 
 function Root() {
   return (
-    <div className="w-full min-h-screen p-2">
-      <main className="clamp mx-auto">
+  <>
+    <div className="w-full min-h-screen px-2">
+      <main className="clamp mx-auto py-0 mb-5">
         <Navbar/>
         <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl print:hidden">
           <span className="text-blue-800">Search.</span>
@@ -29,10 +31,12 @@ function Root() {
           <Routes>
             <Route path="/" element={<><About/><Search/></>} />
             <Route path="/handout" element={<HandoutGenerator />} />
+            <Route path="/meta" element={<Metadata />} />
           </Routes>
         </HandoutProvider>
       </main>
     </div>
+    </>
   );
 }
 

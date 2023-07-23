@@ -80,7 +80,23 @@ func dumpDataset(output *string, contests string) {
 	out.Write(b)
 }
 
-func startServer(dir *string, port int, load []string) {
+func loadMeta(jsonfile string) *scrape.Meta {
+	var dataset scrape.ScrapeResult
+	fileExists(jsonfile)
+	data, err := os.ReadFile(jsonfile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while reading %v! %v\n", jsonfile, err)
+		os.Exit(1)
+	}
+	err = json.Unmarshal(data, &dataset)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while parsing JSON at %v! %v\n", jsonfile, err)
+		os.Exit(1)
+	}
+	return &dataset.Meta
+}
+
+func startServer(dir *string, port int, load []string, meta []string) {
 	if dir != nil {
 		fileExists(*dir)
 	}
@@ -90,7 +106,25 @@ func startServer(dir *string, port int, load []string) {
 			loadDataset(l)
 		}
 	}
-	mux := server.InitServer(dir)
+	var metadata *scrape.Meta = nil
+	if len(meta) > 0 {
+		for _, m := range meta {
+			fileMetaData := loadMeta(m)
+			initializing := metadata == nil
+			if initializing {
+				metadata = &scrape.Meta{}
+			}
+			if initializing || fileMetaData.Date.After(metadata.Date) {
+				metadata.Date = fileMetaData.Date
+			}
+			metadata.ProblemCount += fileMetaData.ProblemCount
+			metadata.Contests = scrape.ContestList{}
+			for key, val := range fileMetaData.Contests {
+				metadata.Contests[key] = append(metadata.Contests[key], val...)
+			}
+		}
+	}
+	mux := server.InitServer(dir, metadata)
 	log.Printf("Running server on port %v...", port)
 	http.ListenAndServe(":"+fmt.Sprint(port), mux)
 }
@@ -118,15 +152,17 @@ func main() {
 	server := &cobra.Command{Use: "server", Aliases: []string{"s"}, Run: func(cmd *cobra.Command, args []string) {
 		port, _ := cmd.Flags().GetInt("port")
 		load, _ := cmd.Flags().GetStringArray("load")
+		meta, _ := cmd.Flags().GetStringArray("meta")
 		dir, _ := cmd.Flags().GetString("dir")
 		if len(dir) > 0 {
-			startServer(&dir, port, load)
+			startServer(&dir, port, load, meta)
 		} else {
-			startServer(nil, port, load)
+			startServer(nil, port, load, meta)
 		}
 	}}
 	server.Flags().IntP("port", "P", 7827, "Port to use")
 	server.Flags().StringArrayP("load", "L", []string{}, "File to load once connected to Redis")
+	server.Flags().StringArrayP("meta", "M", []string{}, "Files to extract metadata about contest from")
 	server.Flags().StringP("dir", "D", "", "Generated directory to store")
 
 	root := &cobra.Command{Use: "psearch", Short: "A fast search engine for browsing math problems to try"}

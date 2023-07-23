@@ -25,7 +25,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	offset, _ := strconv.Atoi(o)
 	w.Header().Add("Content-Type", "application/json")
 	if q != "" {
-		res, err := client.Search(q, offset)
+		res, err := client.SearchProblems(q, offset)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			io.WriteString(w, fmt.Sprint(err))
@@ -46,12 +46,12 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 		msg := "Content-Type header is not application/json"
 		http.Error(w, msg, http.StatusUnsupportedMediaType)
 		return
-    }
+	}
 	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
 	dec := json.NewDecoder(r.Body)
-    dec.DisallowUnknownFields()
+	dec.DisallowUnknownFields()
 	request := handoutRequest{}
-	err := dec.Decode(&request);
+	err := dec.Decode(&request)
 	if err != nil {
 		http.Error(w, fmt.Sprint(err), http.StatusBadRequest)
 	}
@@ -59,7 +59,7 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 	for index, id := range request.ProblemIds {
 		res, err := client.GetById(id)
 		if err != nil {
-			problems[index] = nil 
+			problems[index] = nil
 		} else {
 			err := json.Unmarshal([]byte(res), &problems[index])
 			if err != nil {
@@ -67,7 +67,7 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	encoded, err := json.Marshal(problems);
+	encoded, err := json.Marshal(problems)
 	if err != nil {
 		panic(err)
 	}
@@ -75,7 +75,7 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(encoded)
 }
 
-func InitServer(path *string) *http.ServeMux {
+func InitServer(path *string, meta *scrape.Meta) *http.ServeMux {
 	mux := http.NewServeMux()
 	client = database.InitMeiliSearchClient()
 	if path != nil {
@@ -86,5 +86,13 @@ func InitServer(path *string) *http.ServeMux {
 	}
 	mux.HandleFunc("/backend/search", searchHandler)
 	mux.HandleFunc("/backend/handout", handoutHandler)
+	mux.HandleFunc("/backend/meta", func(w http.ResponseWriter, r *http.Request) {
+		encoded, err := json.Marshal(meta)
+		if err != nil {
+			panic(err)
+		}
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(encoded)
+	})
 	return mux
 }

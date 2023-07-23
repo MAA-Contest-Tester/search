@@ -48,7 +48,7 @@ func ScrapeForumCategories(contestlist ContestList) ScrapeResult {
 		Meta: Meta{
 			Contests:     contestlist,
 			ProblemCount: len(problems),
-			Date:         time.Now().Format("2006.01.02 15:04:05"),
+			Date:         time.Now(),
 		},
 		Problems: session.ScrapeForumList(res),
 	}

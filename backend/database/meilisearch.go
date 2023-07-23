@@ -12,8 +12,9 @@ import (
 )
 
 type MeiliSearchClient struct {
-	client *meilisearch.Client
-	index  *meilisearch.Index
+	client        *meilisearch.Client
+	problemsIndex *meilisearch.Index
+	contestsIndex *meilisearch.Index
 }
 
 func InitMeiliSearchClient() *MeiliSearchClient {
@@ -29,12 +30,15 @@ func InitMeiliSearchClient() *MeiliSearchClient {
 		Host:   host,
 		APIKey: key,
 	})
-	index := client.Index("problems")
-	return &MeiliSearchClient{client: client, index: index}
+	return &MeiliSearchClient{
+		client:        client,
+		problemsIndex: client.Index("problems"),
+		contestsIndex: client.Index("contests"),
+	}
 }
 
 func (c *MeiliSearchClient) Drop() {
-	c.index.DeleteAllDocuments()
+	c.problemsIndex.DeleteAllDocuments()
 }
 
 func calculateSynonyms() map[string][]string {
@@ -104,8 +108,8 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 			"there", "these", "they", "this", "to", "was", "will", "for",
 		},
 	}
-	c.index.UpdateSettings(&settings)
-	_, err := c.index.UpdateSearchableAttributes(&order)
+	c.problemsIndex.UpdateSettings(&settings)
+	_, err := c.problemsIndex.UpdateSearchableAttributes(&order)
 	if err != nil {
 		logger.Fatalln(err)
 	}
@@ -132,20 +136,20 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 
 		docs = append(docs, doc)
 	}
-	task, err := c.index.AddDocuments(docs)
+	task, err := c.problemsIndex.AddDocuments(docs)
 	if err != nil {
 		logger.Fatalln(err)
 	}
 	logger.Println("Task", task.TaskUID)
 }
 
-func (c *MeiliSearchClient) Search(query string, offset int) (string, error) {
-	result, err := c.index.Search(query, &meilisearch.SearchRequest{
+func (c *MeiliSearchClient) SearchProblems(query string, offset int) (string, error) {
+	result, err := c.problemsIndex.Search(query, &meilisearch.SearchRequest{
 		Limit:                 20,
 		AttributesToHighlight: []string{"source", "categories"},
 		HighlightPreTag:       "<span class=\"highlight\">",
 		HighlightPostTag:      "</span>",
-		Offset: int64(offset),
+		Offset:                int64(offset),
 	})
 	if err != nil {
 		return "[]", err
@@ -156,7 +160,7 @@ func (c *MeiliSearchClient) Search(query string, offset int) (string, error) {
 
 func (c *MeiliSearchClient) GetById(id string) (string, error) {
 	var p map[string]interface{}
-	message := c.index.GetDocument(id, &meilisearch.DocumentQuery{}, &p)
+	message := c.problemsIndex.GetDocument(id, &meilisearch.DocumentQuery{}, &p)
 	if message != nil {
 		return "{}", errors.New("404 Not Found")
 	}

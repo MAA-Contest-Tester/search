@@ -16,7 +16,7 @@ type SearchClient interface {
 	Drop()
 	AddProblems(problems []scrape.Problem)
 	// returns either a json with all of the search results or an error.
-	Search(query string, offset int) (string, error)
+	SearchProblems(query string, offset int) (string, error)
 	GetById(id string) (string, error)
 }
 
