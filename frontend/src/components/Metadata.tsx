@@ -33,7 +33,7 @@ export default function Metadata() {
           <h2 className="text-lg">{key}</h2>
           <ul className="list-inside list-disc">
             {value.map((contest, index) => (
-              <li className="text-xs" key={index}><a href={`https://artofproblemsolving.com/community/c${contest.id}`}>{contest.name}</a></li>
+              <li className="text-xs" key={index}><a href={`https://artofproblemsolving.com/community/c${contest.id}`} target="_blank">{contest.name}</a></li>
             ))}
           </ul>
         </div>

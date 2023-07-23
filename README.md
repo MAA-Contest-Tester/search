@@ -38,13 +38,16 @@ will populate the redis database with problems from the json file invoked.
 # Production
 
 Use the included `./docker-compose.example.yml`. The production docker container
-is monolithic and includes all of the dependencies that it requires.
+is monolithic and includes all the dependencies that it requires.
+
+You must specify the runtime environment variable `SOURCES` with a set of
+space-separated URL's that dictate where to download the dataset files.
 
 # The Dataset
 
 The dataset that search.maatester.com uses is updated weekly by GitHub
 Actions. It can be accessed at
-https://github.com/MAA-Contest-Tester/search/releases/download/dataset/data.json
+https://github.com/MAA-Contest-Tester/search/releases/download/dataset/main.json
 
 `main.json` contains a list of 17,000 problems from various short-answer and
 olympiad contests. Each entry contains the following fields:
