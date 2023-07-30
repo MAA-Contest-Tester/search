@@ -75,12 +75,17 @@ func handoutHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(encoded)
 }
 
+var routes []string = []string{"/", "/meta", "/handout"}
+
 func InitServer(path *string, meta *scrape.Meta) *http.ServeMux {
 	mux := http.NewServeMux()
 	client = database.InitMeiliSearchClient()
 	if path != nil {
-		fileserver := http.FileServer(http.Dir(*path))
-		routes := []string{"/", "/meta", "/handout"}
+		fs := SpaFS {
+			root: http.Dir(*path),
+			fallback: "/index.html",
+		}
+		fileserver := http.FileServer(&fs)
 		mux.Handle("/", fileserver)
 		for _, route := range routes {
 			http.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
