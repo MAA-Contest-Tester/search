@@ -76,7 +76,8 @@ export default function Search() {
       Try searching for keywords (e.g. {queryExample("moving points")} or
       {" "}{queryExample("inequality")}). You could also search for problems from a
       specific year or contest ({queryExample("2022 ISL G8")}). Some common
-      abbreviations will work ({queryExample("fe")}, {queryExample("nt")}, etc)
+      abbreviations will work ({queryExample("fe")}, {queryExample("nt")}, etc).
+      Use the icon on the left to add problems to your handout.
         <p className="my-3 mx-0 text-xs sm:text-sm max-w-fit">
         </p>
         <div className="flex flex-row flex-wrap justify-between">
