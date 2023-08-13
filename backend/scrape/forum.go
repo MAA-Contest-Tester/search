@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,6 +18,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
 )
+
+var logger = log.New(os.Stderr, "[Scraper Info]  ", 0)
 
 type ForumSession struct {
 	SessionId string `json:"id"`
