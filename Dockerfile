@@ -2,15 +2,15 @@ FROM golang:latest as backend
 WORKDIR /build
 COPY go.mod go.sum /build/
 RUN go mod download
-COPY . /build/
+COPY . .
 RUN make
 RUN mkdir -p /data
 
 FROM node:alpine as frontend
 WORKDIR /build
-COPY --from=backend /build/yarn.lock /build/package.json ./
+COPY  yarn.lock package.json ./
 RUN yarn install
-COPY --from=backend /build .
+COPY . .
 RUN yarn build
 
 FROM getmeili/meilisearch:latest
