@@ -3,7 +3,7 @@ import renderMathInElement from "katex/dist/contrib/auto-render";
 import "./Result.css";
 import { useContext, useEffect, useRef, useState } from "react";
 import { HandoutIdsContext } from "./HandoutGenerator";
-import {NavLink} from "react-router-dom";
+import React, {NavLink} from "react-router-dom";
 
 const delimiters = [
   { left: "$$", right: "$$", display: true },

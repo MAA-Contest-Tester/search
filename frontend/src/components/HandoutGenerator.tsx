@@ -124,9 +124,6 @@ export function HandoutGenerator() {
             }}
             className="rounded-md my-1 block text-sm w-full"
           />
-          {ids.map((id) => (
-            <input name="id" value={id} type="hidden" key={id} />
-          ))}
         </>
       </div>
       <div className="print:hidden">
