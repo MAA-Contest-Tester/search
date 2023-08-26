@@ -30,6 +30,7 @@ export function HandoutGenerator() {
   const { idText, setIdText } = useContext(HandoutIdsContext);
   const [ids, setIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [hidesource, setHideSource] = useState<boolean>(false);
   const [error, setError] = useState<any | null>(null);
   const [problems, setProblems] = useState<any[]>([]);
   useEffect(() => {
@@ -124,6 +125,17 @@ export function HandoutGenerator() {
             }}
             className="rounded-md my-1 block text-sm w-full"
           />
+
+          <div className="items-center flex">
+            <span className="m-1 text-sm font-bold">Hide Problem Sources</span>
+            <input
+              type="checkbox"
+              className="rounded-sm"
+              alt="Hide problem sources when printing?"
+              checked={hidesource}
+              onChange={() => setHideSource(!hidesource)}
+            />
+            </div>
         </>
       </div>
       <div className="print:hidden">
@@ -150,7 +162,7 @@ export function HandoutGenerator() {
       )}
       {problems.length
         ? problems.map((el, i) => (
-            <Result key={i} data={el} showtags={false} handout />
+            <Result key={i} data={el} showtags={false} alias={hidesource ? `Problem ${i+1}` : undefined} handout />
           ))
         : null}
     </>

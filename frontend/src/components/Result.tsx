@@ -64,6 +64,7 @@ export default function Result(props: {
     id: string;
   } | null;
   showtags: boolean;
+  alias?: string;
   handout?: boolean;
 }) {
   const ref = useRef(null);
@@ -89,20 +90,32 @@ export default function Result(props: {
     >
       {props.data !== null ? (
         <>
-          <a
-            href={props.data.url}
-            target="_blank"
-            className="mx-3 font-bold text-base"
-            dangerouslySetInnerHTML={{ __html: props.data.source! }}
-          ></a>
-          <div className="flex flex-wrap flex-row justify-between items-center print:hidden">
-            <a
-              href={props.data.solution}
+        {
+          props.alias ?
+          <div
+            className={"mx-3 font-bold text-base"}
+          >
+            {props.alias}
+          </div>
+          : <a
+              href={props.data.url}
               target="_blank"
-              className="mx-3 font-bold text-base"
-            >
-              See Discussion
-            </a>
+              className={"mx-3 font-bold text-base"}
+              dangerouslySetInnerHTML={{ __html: props.alias || props.data.source! }}
+            ></a>
+        }
+          <div className="flex flex-wrap flex-row justify-between items-center print:hidden">
+            {
+              !props.alias ?
+              <a
+                href={props.data.solution}
+                target="_blank"
+                className="mx-3 font-bold text-base"
+              >
+                See Discussion
+              </a>
+              : null
+            }
             {props.handout ? null : (
               <div className="flex flex-wrap flex-row justify-left items-center group relative print:hidden">
                 {"ontouchstart" in window ||
