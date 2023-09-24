@@ -6,9 +6,9 @@ while ! wget --no-verbose --spider http://localhost:7700; do
 done
 FILE=1
 if test -z "$SOURCES"; then
-  SOURCES=https://github.com/MAA-Contest-Tester/search/releases/download/dataset/main.json
+  SOURCES="https://github.com/MAA-Contest-Tester/search/releases/download/dataset/computational.json https://github.com/MAA-Contest-Tester/search/releases/download/dataset/nationaloly.json https://github.com/MAA-Contest-Tester/search/releases/download/dataset/international.json"
 fi
-for url in $SOURCES; do
+for url in $(echo $SOURCES); do
   mkdir -p "/data" || exit 1
   rm -rf "/data/$FILE.json"
   wget "$url" -O "/data/$FILE.json" || exit 1

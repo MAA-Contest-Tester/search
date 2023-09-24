@@ -1,0 +1,14 @@
+{
+  "International Olympiads": [
+    {"name": "IMO", "id": 3222},
+    {"name": "ISL", "id": 3223},
+    {"name": "IbMO", "id": 3229},
+    {"name": "APMO", "id": 3226},
+    {"name": "EGMO", "id": 3246},
+    {"name": "JBMO", "id": 3227},
+    {"name": "Balkan MO", "id": 3225},
+    {"name": "Balkan SL", "id": 915845},
+    {"name": "Baltic Way", "id": 3231},
+    {"name": "RMM", "id": 3238}
+  ]
+}

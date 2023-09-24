@@ -1,0 +1,24 @@
+{
+  "National Olympiads": [
+    {"name": "USAMO", "id": 3409},
+    {"name": "USAJMO", "id": 3420},
+    {"name": "ELMO", "id": 3429},
+    {"name": "Sharygin", "id": 3372},
+    {"name": "Canada MO", "id": 3277},
+    {"name": "Korea MO", "id": 3383},
+    {"name": "KJMO", "id": 603052},
+    {"name": "China Second Round", "id": 3288},
+    {"name": "China MO", "id": 3284},
+    {"name": "CGMO", "id": 3287},
+    {"name": "China 2nd Round", "id": 3288},
+    {"name": "Iran MO 2nd Round", "id": 3319},
+    {"name": "Iran MO 3nd Round", "id": 3322},
+    {"name": "All-Russian Olympiad", "id": 3371}
+  ],
+  "IMO Selection Tests": [
+    {"name": "USA TSTST", "id": 3424},
+    {"name": "USA TST", "id": 3411},
+    {"name": "China TST", "id": 3282},
+    {"name": "Korea TST", "id": 3384}
+  ]
+}

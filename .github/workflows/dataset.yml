@@ -15,7 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
-      - run: go run . dump -C contests/searchmaatestercom.json out/main.json
+      - run: go run . dump -C contests/computational.json out/computational.json
+      - run: go run . dump -C contests/international.json out/international.json
+      - run: go run . dump -C contests/nationaloly.json out/nationaloly.json
       - name: Delete nightly release
         run: gh release delete dataset --yes || true
       - name: Upload to releases

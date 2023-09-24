@@ -101,7 +101,7 @@ type TopicResponse struct {
 func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
 	logger.Println("Parsing Forum Topic", id, "...")
 	client := http.Client{
-		Timeout: time.Minute * 40,
+		Timeout: time.Minute * 5,
 	}
 	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_topic"}, "topic_id": {strconv.Itoa(id)}}))
 	if err != nil || resp == nil || resp.StatusCode != 200 {
@@ -417,7 +417,7 @@ problem because of the recursive structure of AoPS categories):
 func (f *ForumSession) GetCategoryItems(id int) (*CategoryResponse, error) {
 	logger.Println("Parsing Forum Category", id, "...")
 	client := http.Client{
-		Timeout: time.Minute * 20,
+		Timeout: time.Minute * 5,
 	}
 	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_category_data"}, "category_id": {strconv.Itoa(id)}}))
 	if err != nil {

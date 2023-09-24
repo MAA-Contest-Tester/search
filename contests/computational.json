@@ -1,0 +1,21 @@
+{
+  "AMC Series": [
+    {"name": "AMC 8", "id": 3413},
+    {"name": "AMC 10", "id": 3414},
+    {"name": "AMC 12", "id": 3415},
+    {"name": "AIME", "id": 3416},
+    {"name": "MPFG", "id": 3427},
+    {"name": "USAMTS", "id": 3412},
+    {"name": "MPFG Olympiad", "id": 953466}
+  ],
+  "College Competitions": [
+    { "name": "CMIMC", "id": 253928},
+    { "name": "CHMMC", "id": 2746308},
+    { "name": "HMMT", "id": 3417},
+    { "name": "HMMT November", "id": 2881068},
+    { "name": "SMT", "id": 3418},
+    { "name": "BMT", "id": 2503467},
+    { "name": "PUMAC", "id": 3426},
+    { "name": "BAMO", "id": 233906}
+  ]
+}
