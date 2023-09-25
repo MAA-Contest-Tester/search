@@ -10,5 +10,17 @@
     {"name": "Balkan SL", "id": 915845},
     {"name": "Baltic Way", "id": 3231},
     {"name": "RMM", "id": 3238}
+  ],
+  "IMO Selection Tests": [
+    {"name": "USA TSTST", "id": 3424},
+    {"name": "USA TST", "id": 3411},
+    {"name": "China TST", "id": 3282},
+    {"name": "Korea TST", "id": 3384},
+    {"name": "Iran TST", "id": 3321},
+    {"name": "Japan TST", "id": 3273327},
+    {"name": "Russia TST", "id": 3315053},
+    {"name": "Taiwan TST 1st Round", "id": 3394},
+    {"name": "Taiwan TST 2nd Round", "id": 3395},
+    {"name": "Taiwan TST 3rd Round", "id": 3396}
   ]
 }
