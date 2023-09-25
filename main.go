@@ -108,17 +108,16 @@ func startServer(dir *string, port int, load []string, meta []string) {
 	}
 	var metadata *scrape.Meta = nil
 	if len(meta) > 0 {
-		for _, m := range meta {
+		for i, m := range meta {
 			fileMetaData := loadMeta(m)
-			initializing := metadata == nil
-			if initializing {
+			if i == 0 {
 				metadata = &scrape.Meta{}
+				metadata.Contests = scrape.ContestList{}
 			}
-			if initializing || fileMetaData.Date.After(metadata.Date) {
+			if i == 0 || fileMetaData.Date.After(metadata.Date) {
 				metadata.Date = fileMetaData.Date
 			}
 			metadata.ProblemCount += fileMetaData.ProblemCount
-			metadata.Contests = scrape.ContestList{}
 			for key, val := range fileMetaData.Contests {
 				metadata.Contests[key] = append(metadata.Contests[key], val...)
 			}
