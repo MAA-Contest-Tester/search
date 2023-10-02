@@ -94,18 +94,19 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 		SearchableAttributes: []string{"source", "statement", "categories"},
 		Synonyms:             calculateSynonyms(),
 		RankingRules: []string{
+			"words",
 			"attribute",
 			"exactness",
-			"proximity",
-			"words",
-			"sort",
 			"typo",
+			"proximity",
+			"sort",
 			"year:desc",
 		},
 		StopWords: []string{
 			"a", "is", "the", "an", "and", "as", "at", "be", "but", "by",
 			"into", "it", "not", "of", "on", "or", "their",
 			"there", "these", "they", "this", "to", "was", "will", "for",
+			"problem",
 		},
 	}
 	c.problemsIndex.UpdateSettings(&settings)

@@ -21,6 +21,8 @@
     {"name": "Russia TST", "id": 3315053},
     {"name": "Taiwan TST 1st Round", "id": 3394},
     {"name": "Taiwan TST 2nd Round", "id": 3395},
-    {"name": "Taiwan TST 3rd Round", "id": 3396}
+    {"name": "Taiwan TST 3rd Round", "id": 3396},
+    {"name": "Germany TST", "id": 3300},
+    {"name": "Vietnam TST", "id": 3442}
   ]
 }

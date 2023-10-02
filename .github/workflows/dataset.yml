@@ -7,7 +7,7 @@ on:
 
 jobs:
   dataset:
-    timeout-minutes: 10 # if it takes more than 2 minutes, there's a network error.
+    timeout-minutes: 15 # if it takes more than 2 minutes, there's a network error.
     env:
       GH_REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
