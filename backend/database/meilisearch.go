@@ -106,7 +106,6 @@ func (c *MeiliSearchClient) AddProblems(problems []scrape.Problem) {
 			"a", "is", "the", "an", "and", "as", "at", "be", "but", "by",
 			"into", "it", "not", "of", "on", "or", "their",
 			"there", "these", "they", "this", "to", "was", "will", "for",
-			"problem",
 		},
 	}
 	c.problemsIndex.UpdateSettings(&settings)
