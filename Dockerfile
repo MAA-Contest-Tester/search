@@ -1,4 +1,4 @@
-FROM golang:latest as backend
+FROM golang:latest AS backend
 WORKDIR /build
 COPY go.mod go.sum /build/
 RUN go mod download
@@ -6,7 +6,7 @@ COPY . .
 RUN make
 RUN mkdir -p /data
 
-FROM node:alpine as frontend
+FROM node:alpine AS frontend
 WORKDIR /build
 COPY yarn.lock package.json ./
 RUN yarn install

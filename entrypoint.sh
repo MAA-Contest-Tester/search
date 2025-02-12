@@ -3,7 +3,7 @@
 set -x
 
 /meilisearch &
-while ! wget --no-verbose --spider http://localhost:7700; do
+while ! wget --no-verbose --spider http://0.0.0.0:7700; do
   sleep 1s
 done
 FILE=1
