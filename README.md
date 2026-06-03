@@ -47,7 +47,7 @@ space-separated URL's that dictate where to download the dataset files.
 
 The dataset that search.maatester.com uses is updated weekly by GitHub
 Actions. It can be accessed at
-https://github.com/MAA-Contest-Tester/search/releases/download/dataset/main.json
+https://github.com/MAA-Contest-Tester/search/releases/tag/dataset
 
 `main.json` contains a list of 17,000 problems from various short-answer and
 olympiad contests. Each entry contains the following fields:
