@@ -8,8 +8,9 @@ RUN mkdir -p /data
 
 FROM node:alpine AS frontend
 WORKDIR /build
+RUN npm install --global yarn@1.22.22
 COPY yarn.lock package.json ./
-RUN yarn install
+RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn build
 
