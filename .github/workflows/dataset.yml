@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '0 0 * * SUN'
 
+permissions:
+  contents: write
 
 jobs:
   dataset:
@@ -13,8 +15,10 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
       - run: go run . dump -C contests/computational.json out/computational.json
       - run: go run . dump -C contests/international.json out/international.json
       - run: go run . dump -C contests/nationaloly.json out/nationaloly.json
