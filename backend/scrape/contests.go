@@ -21,6 +21,7 @@ func (session *ForumSession) scrapeForumPage(id int) []int {
 
 func ScrapeForumCategories(contestlist ContestList) ScrapeResult {
 	session := InitForumSession()
+	defer session.Close()
 	res := make([]int, 0)
 
 	contestlist_length := 0
@@ -50,7 +51,7 @@ func ScrapeForumCategories(contestlist ContestList) ScrapeResult {
 			ProblemCount: len(problems),
 			Date:         time.Now(),
 		},
-		Problems: session.ScrapeForumList(res),
+		Problems: problems,
 	}
 }
 
