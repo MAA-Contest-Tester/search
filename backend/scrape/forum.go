@@ -92,6 +92,11 @@ func InitForumSession() ForumSession {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("headless", "new"),
 		chromedp.Flag("disable-blink-features", "AutomationControlled"),
+		// Required on GitHub Actions Ubuntu runners (23.10+) where AppArmor
+		// blocks unprivileged user namespaces, which Chromium's zygote sandbox
+		// needs to start. Without this, Chromium aborts with "No usable
+		// sandbox!" on the very first launch.
+		chromedp.NoSandbox,
 		chromedp.UserAgent(browserUserAgent),
 	)
 	allocCtx, cancelAlloc := chromedp.NewExecAllocator(context.Background(), opts...)
