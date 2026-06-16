@@ -21,6 +21,45 @@ import (
 
 var logger = log.New(os.Stderr, "[Scraper Info]  ", 0)
 
+// Cap concurrent HTTP requests to AoPS to avoid rate limiting. Each AJAX call
+// takes ~1s, so 8 in flight is ~8 req/sec — gentle enough to stay under the
+// limit while keeping the full dataset dump well inside the workflow timeout.
+const maxConcurrentRequests = 8
+
+var requestSem = make(chan struct{}, maxConcurrentRequests)
+
+// postAjax sends a POST to the AoPS community AJAX endpoint with the configured
+// session, capped to maxConcurrentRequests in flight. It retries when the
+// response is not valid JSON (the symptom of an HTML rate-limit page).
+func (f *ForumSession) postAjax(body url.Values) ([]byte, error) {
+	client := http.Client{Timeout: time.Minute * 5}
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(attempt*2) * time.Second)
+		}
+		requestSem <- struct{}{}
+		resp, err := client.Do(f.InitRequest(body))
+		if err != nil || resp == nil {
+			<-requestSem
+			lastErr = err
+			continue
+		}
+		respbody, rerr := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		<-requestSem
+		if rerr != nil {
+			lastErr = rerr
+			continue
+		}
+		if json.Valid(respbody) {
+			return respbody, nil
+		}
+		lastErr = errors.New("non-JSON response from AoPS (likely rate limited)")
+	}
+	return nil, lastErr
+}
+
 type ForumSession struct {
 	SessionId string `json:"id"`
 	UserId    int    `json:"user_id"`
@@ -100,42 +139,26 @@ type TopicResponse struct {
 
 func (f *ForumSession) GetTopic(id int) (*TopicResponse, error) {
 	logger.Println("Parsing Forum Topic", id, "...")
-	client := http.Client{
-		Timeout: time.Minute * 5,
-	}
-	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_topic"}, "topic_id": {strconv.Itoa(id)}}))
-	if err != nil || resp == nil || resp.StatusCode != 200 {
-		logger.Println(err)
-		return nil, err
-	}
-	if resp.Body != nil {
-		defer resp.Body.Close()
-	}
-	respbody, err := io.ReadAll(resp.Body)
+	respbody, err := f.postAjax(url.Values{"a": {"fetch_topic"}, "topic_id": {strconv.Itoa(id)}})
 	if err != nil {
 		logger.Println(err)
 		return nil, err
 	}
 
-	x := ErrorResponse{}
-	json.Unmarshal(respbody, &x)
-
 	serialized := TopicResponse{}
 	err = json.Unmarshal(respbody, &serialized)
 	if err != nil || serialized.Response.Topic == nil {
 		serializederror := ErrorResponse{}
-		sererr := json.Unmarshal(respbody, &serializederror)
-		if sererr != nil {
-			log.Fatal(sererr)
+		if sererr := json.Unmarshal(respbody, &serializederror); sererr != nil {
+			return nil, sererr
 		}
 		if len(serializederror.Code) > 0 {
 			return nil, errors.New(serializederror.Code)
 		}
 		return nil, err
-	} else {
-		logger.Println("Finished Parsing Forum Topic", id)
-		return &serialized, nil
 	}
+	logger.Println("Finished Parsing Forum Topic", id)
+	return &serialized, nil
 }
 
 /*
@@ -416,17 +439,7 @@ problem because of the recursive structure of AoPS categories):
 
 func (f *ForumSession) GetCategoryItems(id int) (*CategoryResponse, error) {
 	logger.Println("Parsing Forum Category", id, "...")
-	client := http.Client{
-		Timeout: time.Minute * 5,
-	}
-	resp, err := client.Do(f.InitRequest(url.Values{"a": {"fetch_category_data"}, "category_id": {strconv.Itoa(id)}}))
-	if err != nil {
-		logger.Println(err)
-	}
-	if resp.Body != nil {
-		defer resp.Body.Close()
-	}
-	respbody, err := io.ReadAll(resp.Body)
+	respbody, err := f.postAjax(url.Values{"a": {"fetch_category_data"}, "category_id": {strconv.Itoa(id)}})
 	if err != nil {
 		logger.Println(err)
 		return nil, err
@@ -435,25 +448,24 @@ func (f *ForumSession) GetCategoryItems(id int) (*CategoryResponse, error) {
 	err = json.Unmarshal(respbody, &serialized)
 	if err != nil || serialized.Response.Category == nil {
 		serializederror := ErrorResponse{}
-		sererr := json.Unmarshal(respbody, &serializederror)
-		if sererr != nil {
-			log.Fatal(sererr)
+		if sererr := json.Unmarshal(respbody, &serializederror); sererr != nil {
+			return nil, sererr
 		}
 		if len(serializederror.Code) > 0 {
 			return nil, errors.New(serializederror.Code)
 		}
 		return nil, err
-	} else {
-		for i, x := range serialized.Response.Category.Items {
-			// in the second case described above, this effectively does
-			// nothing.
-			r, err := parseProblemRenderedHTML(x.PostData.Rendered)
-			if err != nil {
-				logger.Fatal(err)
-			}
-			serialized.Response.Category.Items[i].PostData.Canonical = r
-		}
-		logger.Println("Finished Parsing Forum Category", id)
-		return &serialized, nil
 	}
+	for i, x := range serialized.Response.Category.Items {
+		// in the second case described above, this effectively does
+		// nothing.
+		r, perr := parseProblemRenderedHTML(x.PostData.Rendered)
+		if perr != nil {
+			logger.Println("parseProblemRenderedHTML:", perr)
+			continue
+		}
+		serialized.Response.Category.Items[i].PostData.Canonical = r
+	}
+	logger.Println("Finished Parsing Forum Category", id)
+	return &serialized, nil
 }
