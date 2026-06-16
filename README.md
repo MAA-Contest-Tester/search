@@ -1,10 +1,7 @@
 # Search.MAATester.com
 
-**Note:** Due to AoPS API limits, we are no longer able to generate the datasets
-for this site, and so it will be brought down soon. Repository code remains as
-an artifact.
-
-A search engine for math contest problems.
+A search engine for math contest problems. Deployed at
+[search.maatester.com](https://search.maatester.com)
 
 # Setup
 
