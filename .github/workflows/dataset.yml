@@ -9,7 +9,10 @@ permissions:
 
 jobs:
   dataset:
-    timeout-minutes: 15 # if it takes more than 2 minutes, there's a network error.
+    # Locally a clean sweep of all three contest files takes ~90 minutes at the
+    # rate cap we use to stay under Cloudflare's bot-fight budget. 180 gives
+    # the workflow margin for retries and CI overhead.
+    timeout-minutes: 180
     env:
       GH_REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -22,6 +25,22 @@ jobs:
       - run: go run . dump -C contests/computational.json out/computational.json
       - run: go run . dump -C contests/international.json out/international.json
       - run: go run . dump -C contests/nationaloly.json out/nationaloly.json
+      - name: Sanity-check that datasets are non-empty
+        # If the scraper silently produced near-empty JSON (e.g. AoPS blocked
+        # us at the network layer and every fetch failed), refuse to publish.
+        # Better to keep the previous release than overwrite it with garbage.
+        run: |
+          set -e
+          fail=0
+          for f in out/*.json; do
+            count=$(jq '.problems | length' "$f")
+            echo "::notice file=$f::$count problems"
+            if [ "$count" -lt 100 ]; then
+              echo "::error file=$f::only $count problems — refusing to publish"
+              fail=1
+            fi
+          done
+          exit $fail
       - name: Delete nightly release
         run: gh release delete dataset --yes || true
       - name: Upload to releases

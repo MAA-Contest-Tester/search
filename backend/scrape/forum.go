@@ -1,12 +1,11 @@
 package scrape
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"regexp"
@@ -16,49 +15,65 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/chromedp/cdproto/runtime"
+	"github.com/chromedp/chromedp"
 	"golang.org/x/net/html"
 )
 
 var logger = log.New(os.Stderr, "[Scraper Info]  ", 0)
 
-// Cap concurrent HTTP requests to AoPS to avoid rate limiting. Each AJAX call
-// takes ~1s, so 8 in flight is ~8 req/sec — gentle enough to stay under the
-// limit while keeping the full dataset dump well inside the workflow timeout.
-const maxConcurrentRequests = 8
+// Cap concurrent AJAX calls to AoPS. The calls are issued via in-page fetch()
+// inside a single Chromium instance.
+const maxConcurrentRequests = 4
 
 var requestSem = make(chan struct{}, maxConcurrentRequests)
 
-// postAjax sends a POST to the AoPS community AJAX endpoint with the configured
-// session, capped to maxConcurrentRequests in flight. It retries when the
-// response is not valid JSON (the symptom of an HTML rate-limit page).
-func (f *ForumSession) postAjax(body url.Values) ([]byte, error) {
-	client := http.Client{Timeout: time.Minute * 5}
-	var lastErr error
-	for attempt := 0; attempt < 3; attempt++ {
-		if attempt > 0 {
-			time.Sleep(time.Duration(attempt*2) * time.Second)
-		}
-		requestSem <- struct{}{}
-		resp, err := client.Do(f.InitRequest(body))
-		if err != nil || resp == nil {
-			<-requestSem
-			lastErr = err
-			continue
-		}
-		respbody, rerr := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		<-requestSem
-		if rerr != nil {
-			lastErr = rerr
-			continue
-		}
-		if json.Valid(respbody) {
-			return respbody, nil
-		}
-		lastErr = errors.New("non-JSON response from AoPS (likely rate limited)")
+// Hard rate cap. Empirical observation from local runs: Cloudflare lets the
+// in-page fetch through for ~1000 successful requests, then walls the
+// connection for ~20 seconds. Pacing at 5 req/sec keeps us under that budget
+// indefinitely (300/min).
+const minTimeBetweenRequests = 200 * time.Millisecond
+
+var (
+	rateMu        sync.Mutex
+	nextRequestAt time.Time
+)
+
+func reserveRequestSlot() {
+	rateMu.Lock()
+	now := time.Now()
+	target := nextRequestAt
+	if now.After(target) {
+		target = now
 	}
-	return nil, lastErr
+	nextRequestAt = target.Add(minTimeBetweenRequests)
+	delay := target.Sub(now)
+	rateMu.Unlock()
+	if delay > 0 {
+		time.Sleep(delay)
+	}
 }
+
+// Cloudflare may re-issue the JS challenge mid-scrape. Strategy:
+//   - postAjax holds resolveMu.RLock for the duration of each fetch — many
+//     fetches can run concurrently.
+//   - When a fetch comes back with "Just a moment...", that goroutine calls
+//     resolveChallenge which takes resolveMu.Lock — blocking all in-flight and
+//     new fetches until the navigation is done.
+//   - resolveChallenge dedupes: if another goroutine already resolved within
+//     the last 10s, skip (the cookie is already fresh).
+var (
+	resolveMu       sync.RWMutex
+	lastResolveAt   time.Time
+	lastResolveAtMu sync.Mutex
+)
+
+// AoPS sits behind a Cloudflare JS challenge on /community/* that pins the
+// resulting cf_clearance cookie to the solver's TLS fingerprint. The robust
+// workaround is to do the bulk scrape from inside the same headless Chromium
+// that solved the challenge — fetch() runs in the page context, so it inherits
+// the cookie and the matching handshake automatically.
+const browserUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
 type ForumSession struct {
 	SessionId string `json:"id"`
@@ -67,52 +82,177 @@ type ForumSession struct {
 	LoggedIn  bool   `json:"logged_in"`
 	Role      string `json:"role"`
 	Sid       string `json:",omitempty"`
+
+	browserCtx    context.Context
+	cancelBrowser context.CancelFunc
+	cancelAlloc   context.CancelFunc
 }
 
 func InitForumSession() ForumSession {
-	sessionre := regexp.MustCompile(`AoPS\.session = ({.*?})`)
-	resp, err := http.Get("https://artofproblemsolving.com")
-	if err != nil {
-		logger.Fatal(err)
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", "new"),
+		chromedp.Flag("disable-blink-features", "AutomationControlled"),
+		chromedp.UserAgent(browserUserAgent),
+	)
+	allocCtx, cancelAlloc := chromedp.NewExecAllocator(context.Background(), opts...)
+	bctx, cancelBrowser := chromedp.NewContext(allocCtx)
+
+	logger.Println("Launching headless Chromium and solving Cloudflare challenge...")
+	// Warm up the browser on bctx itself — chromedp lazy-launches Chrome on the
+	// first Run() call and ties its lifetime to that call's context. If we used
+	// a timeout child here, cancelling the timeout would also kill Chrome.
+	if err := chromedp.Run(bctx); err != nil {
+		cancelBrowser()
+		cancelAlloc()
+		logger.Fatal("chromedp launch: ", err)
 	}
-	data := ForumSession{}
-	for _, c := range resp.Cookies() {
-		if c.Name == "aopssid" {
-			data.Sid = c.Value
-		}
+
+	// Use bctx (no timeout child) so the navigation state stays alive for
+	// subsequent postAjax calls. chromedp ties some page state to the first
+	// navigation's context — cancelling that context resets the tab.
+	var sessionJSON string
+	if err := chromedp.Run(bctx,
+		chromedp.Navigate("https://artofproblemsolving.com/community/c3413"),
+		chromedp.Sleep(8*time.Second),
+		chromedp.Evaluate(`JSON.stringify(window.AoPS && window.AoPS.session ? window.AoPS.session : null)`, &sessionJSON),
+	); err != nil {
+		cancelBrowser()
+		cancelAlloc()
+		logger.Fatal("chromedp init: ", err)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		logger.Fatal(err)
+	if sessionJSON == "" || sessionJSON == "null" {
+		cancelBrowser()
+		cancelAlloc()
+		logger.Fatal("AoPS.session not found after navigation; the Cloudflare challenge probably did not resolve")
 	}
-	session := sessionre.FindSubmatch(body)[1]
-	if err = json.Unmarshal(session, &data); err != nil {
-		logger.Fatal(err)
+	data := ForumSession{
+		browserCtx:    bctx,
+		cancelBrowser: cancelBrowser,
+		cancelAlloc:   cancelAlloc,
 	}
+	if err := json.Unmarshal([]byte(sessionJSON), &data); err != nil {
+		cancelBrowser()
+		cancelAlloc()
+		logger.Fatal("parsing AoPS.session: ", err)
+	}
+	logger.Printf("Forum session ready (user_id=%d, logged_in=%v)", data.UserId, data.LoggedIn)
 	return data
 }
 
-func (f *ForumSession) InitRequest(body_input url.Values) *http.Request {
-	body := url.Values{
-		"aops_logged_in":  {strconv.FormatBool(f.LoggedIn)},
-		"aops_user_id":    {strconv.Itoa(f.UserId)},
-		"aops_session_id": {f.SessionId},
+func (f *ForumSession) Close() {
+	if f.cancelBrowser != nil {
+		f.cancelBrowser()
 	}
-	for k, v := range body_input {
-		body[k] = v
+	if f.cancelAlloc != nil {
+		f.cancelAlloc()
 	}
-	req, err := http.NewRequest(
-		http.MethodPost,
-		"https://artofproblemsolving.com/m/community/ajax.php",
-		strings.NewReader(body.Encode()),
-	)
+}
+
+// resolveChallenge re-navigates the browser to a community page so Cloudflare
+// can issue a fresh cf_clearance cookie. Takes the write lock — all in-flight
+// fetches finish first, then no new fetches start until navigation completes.
+// Dedupes by wall-clock: if another goroutine just resolved, skip.
+func (f *ForumSession) resolveChallenge() {
+	resolveMu.Lock()
+	defer resolveMu.Unlock()
+	// Dedupe window matches the empirical wall duration (~22s). If a previous
+	// goroutine already paused-and-re-navigated within the last 30s, the cookie
+	// is fresh enough; skip.
+	lastResolveAtMu.Lock()
+	if !lastResolveAt.IsZero() && time.Since(lastResolveAt) < 30*time.Second {
+		lastResolveAtMu.Unlock()
+		return
+	}
+	lastResolveAtMu.Unlock()
+
+	logger.Println("Cloudflare wall hit. Cooling down 30s, then re-navigating...")
+	time.Sleep(30 * time.Second)
+	ctx, cancel := context.WithTimeout(f.browserCtx, 45*time.Second)
+	defer cancel()
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate("https://artofproblemsolving.com/community/c3413"),
+		chromedp.Sleep(6*time.Second),
+	); err != nil {
+		logger.Println("resolveChallenge:", err)
+	}
+	lastResolveAtMu.Lock()
+	lastResolveAt = time.Now()
+	lastResolveAtMu.Unlock()
+}
+
+const fetchAjaxJS = `(async () => {
+	const r = await fetch('/m/community/ajax.php', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+			'X-Requested-With': 'XMLHttpRequest',
+			'Accept': 'application/json, text/javascript, */*; q=0.01'
+		},
+		body: %s
+	});
+	return await r.text();
+})()`
+
+// postAjax posts to /m/community/ajax.php from inside the headless browser so
+// the request inherits cf_clearance and the matching TLS handshake. Retries up
+// to 3x with backoff on JS exceptions or non-JSON responses.
+func (f *ForumSession) postAjax(body url.Values) ([]byte, error) {
+	if body.Get("aops_logged_in") == "" {
+		body.Set("aops_logged_in", strconv.FormatBool(f.LoggedIn))
+		body.Set("aops_user_id", strconv.Itoa(f.UserId))
+		body.Set("aops_session_id", f.SessionId)
+	}
+	bodyLit, err := json.Marshal(body.Encode())
 	if err != nil {
-		logger.Fatal(err)
+		return nil, err
 	}
-	req.AddCookie(&http.Cookie{Name: "aopsuid", Value: strconv.Itoa(f.UserId)})
-	req.AddCookie(&http.Cookie{Name: "aopssid", Value: f.Sid})
-	req.Header.Add("content-type", "application/x-www-form-urlencoded")
-	return req
+	js := fmt.Sprintf(fetchAjaxJS, string(bodyLit))
+
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(attempt*2) * time.Second)
+		}
+		// Rate cap first — paces total req/sec across all goroutines.
+		reserveRequestSlot()
+		// RLock: many fetches can run concurrently, but resolveChallenge can
+		// take the write lock to pause everyone for re-navigation.
+		resolveMu.RLock()
+		requestSem <- struct{}{}
+		ctx, cancel := context.WithTimeout(f.browserCtx, 5*time.Minute)
+		var result string
+		runErr := chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+			res, exc, e := runtime.Evaluate(js).WithAwaitPromise(true).WithReturnByValue(true).Do(ctx)
+			if e != nil {
+				return e
+			}
+			if exc != nil {
+				return fmt.Errorf("js exception: %s", exc.Text)
+			}
+			return json.Unmarshal(res.Value, &result)
+		}))
+		cancel()
+		<-requestSem
+		resolveMu.RUnlock()
+		if runErr != nil {
+			lastErr = runErr
+			continue
+		}
+		if json.Valid([]byte(result)) {
+			return []byte(result), nil
+		}
+		// If Cloudflare bounced us with a fresh challenge, re-solve. The call
+		// dedupes — if another goroutine resolved <10s ago, it's a no-op.
+		if strings.Contains(result, "Just a moment...") {
+			f.resolveChallenge()
+		}
+		preview := result
+		if len(preview) > 160 {
+			preview = preview[:160]
+		}
+		lastErr = fmt.Errorf("non-JSON response from AoPS via in-page fetch (preview: %s)", preview)
+	}
+	return nil, lastErr
 }
 
 type ErrorResponse struct {
