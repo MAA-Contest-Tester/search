@@ -34,22 +34,19 @@ export function newId(): string {
   );
 }
 
+// Callers only ever pass concrete field values (UI literals, migration data);
+// untrusted/persisted input is validated by normalizeHandout instead, so a
+// plain spread is enough here.
 export function emptyHandout(partial?: Partial<Handout>): Handout {
-  const base: Handout = {
+  return {
     id: newId(),
     title: "",
     author: "",
     description: "",
     hideSource: false,
     ids: [],
+    ...partial,
   };
-  // Only copy defined keys so an explicit `undefined` can't blow away a default.
-  if (partial) {
-    for (const k of Object.keys(partial) as (keyof Handout)[]) {
-      if (partial[k] !== undefined) (base as any)[k] = partial[k];
-    }
-  }
-  return base;
 }
 
 // --- guarded localStorage access -------------------------------------------
