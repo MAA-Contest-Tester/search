@@ -7,6 +7,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: dataset
+  cancel-in-progress: false
+
 jobs:
   dataset:
     # Locally a clean sweep of all three contest files takes ~90 minutes at the
