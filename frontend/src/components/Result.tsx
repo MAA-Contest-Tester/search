@@ -1,8 +1,8 @@
 import "katex/dist/katex.min.css";
 import renderMathInElement from "katex/dist/contrib/auto-render";
 import "./Result.css";
-import { useContext, useEffect, useRef, useState } from "react";
-import { HandoutIdsContext } from "./HandoutGenerator";
+import { useEffect, useRef } from "react";
+import { useHandouts } from "./handouts";
 import React, {NavLink} from "react-router-dom";
 
 const delimiters = [
@@ -79,8 +79,8 @@ export default function Result(props: {
       });
     }
   });
-  const { idText, setIdText } = useContext(HandoutIdsContext);
-  const [clicked, setClicked] = useState<boolean>(false);
+  const { toggleProblemInActive, isInActive, activeHandout } = useHandouts();
+  const added = props.data ? isInActive(props.data.id) : false;
   const preprocessed = preprocess(props.data?.statement);
   return (
     <div
@@ -122,32 +122,38 @@ export default function Result(props: {
                 navigator.maxTouchPoints > 0 ? null : (
                   <span
                     className={
-                      "absolute bottom-0 -translate-x-[0.6rem] w-[4.5rem] translate-y-14 origin-top scale-0 group-hover:scale-100 transition duration-200 ease-in-out rounded-lg z-50 p-1 font-bold text-sm text-center" +
+                      "absolute left-0 top-full mt-2 -translate-x-[0.6rem] max-w-[12rem] w-max origin-top scale-0 group-hover:scale-100 transition duration-200 ease-in-out rounded-lg z-50 p-1 font-bold text-sm text-center" +
                       " " +
-                      (clicked
+                      (added
                         ? "bg-green-800 text-white"
                         : "bg-white text-black border border-gray-200")
                     }
                   >
-                    Add to <NavLink to="/handout" className={clicked ? "text-white hover:text-white decoration-white": ""}>Handout</NavLink>
+                    {added ? "Remove from " : "Add to "}
+                    <NavLink
+                      to="/handout"
+                      className={added ? "text-white hover:text-white decoration-white" : ""}
+                    >
+                      {activeHandout?.title || "Handout"}
+                    </NavLink>
                   </span>
                 )}
                 <button
+                  title={
+                    added
+                      ? `Remove from "${activeHandout?.title || "Handout"}"`
+                      : `Add to "${activeHandout?.title || "Handout"}"`
+                  }
                   onClick={(_) => {
-                    setIdText(
-                      idText +
-                        (idText.trim().length != 0 ? "\n" : "") +
-                        props.data?.id
-                    );
-                    setClicked(true);
+                    if (props.data) toggleProblemInActive(props.data.id);
                   }}
                   className={
                     "mx-3 font-bold text-sm p-[5px] border-gray-200 rounded-lg border duration-200" +
                     " " +
-                    (clicked ? "bg-green-800 text-white" : "")
+                    (added ? "bg-green-800 text-white" : "")
                   }
                 >
-                  {clicked ? (
+                  {added ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       height="1.2em"
