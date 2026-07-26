@@ -1,10 +1,8 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import About from "./components/About";
-import {
-  HandoutGenerator,
-  HandoutProvider,
-} from "./components/HandoutGenerator";
+import { HandoutGenerator } from "./components/handout/HandoutGenerator";
+import { HandoutsProvider } from "./components/handout/handouts";
 import Search from "./components/Search";
 import "./index.css";
 import React, {
@@ -22,7 +20,7 @@ function Root() {
   return (
     <div className="w-full min-h-screen px-2">
       <main className="clamp mx-auto py-0 mb-5">
-        <HandoutProvider>
+        <HandoutsProvider>
           <Navbar />
           <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl print:hidden">
             <span className="text-blue-800">Search.</span>
@@ -41,7 +39,7 @@ function Root() {
             <Route path="/handout" element={<HandoutGenerator />} />
             <Route path="/meta" element={<Metadata />} />
           </Routes>
-        </HandoutProvider>
+        </HandoutsProvider>
       </main>
     </div>
   );

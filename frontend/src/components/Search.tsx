@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import Result from "./Result";
 
 export default function Search() {
@@ -77,7 +78,9 @@ export default function Search() {
       {" "}{queryExample("inequality")}). You could also search for problems from a
       specific year or contest ({queryExample("2022 ISL G8")}). Some common
       abbreviations will work ({queryExample("fe")}, {queryExample("nt")}, etc).
-      Use the icon on the left to add problems to your handout.
+      Use the icon on the right of each result to add problems to your active
+      handout, then manage and print them on the{" "}
+      <NavLink to="/handout" className="font-bold">Handout</NavLink> page.
         <p className="my-3 mx-0 text-xs sm:text-sm max-w-fit">
         </p>
         <div className="flex flex-row flex-wrap justify-between">

@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "frontend:dev": "vite --host 0.0.0.0",
+    "backend:dev": "go run . server",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
