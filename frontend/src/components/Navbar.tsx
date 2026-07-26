@@ -1,5 +1,5 @@
 import React, { NavLink } from "react-router-dom";
-import { useHandouts } from "./handouts";
+import { useHandouts } from "./handout/handouts";
 
 export default function Navbar() {
   const { handouts, activeHandout } = useHandouts();

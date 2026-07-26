@@ -2,7 +2,7 @@ import "katex/dist/katex.min.css";
 import renderMathInElement from "katex/dist/contrib/auto-render";
 import "./Result.css";
 import { useEffect, useRef } from "react";
-import { useHandouts } from "./handouts";
+import { useHandouts } from "./handout/handouts";
 import React, {NavLink} from "react-router-dom";
 
 const delimiters = [

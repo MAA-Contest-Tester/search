@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import Result from "./Result";
+import Result from "../Result";
 import { Handout, useHandouts } from "./handouts";
 
 // Fetch the full problem records for a handout's ids, preserving order. The

@@ -1,8 +1,8 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import About from "./components/About";
-import { HandoutGenerator } from "./components/HandoutGenerator";
-import { HandoutsProvider } from "./components/handouts";
+import { HandoutGenerator } from "./components/handout/HandoutGenerator";
+import { HandoutsProvider } from "./components/handout/handouts";
 import Search from "./components/Search";
 import "./index.css";
 import React, {
